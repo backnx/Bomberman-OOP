@@ -215,7 +215,13 @@ public class Sprite {
 			}
 		}
 	}
-	
+
+	/*
+	|--------------------------------------------------------------------------
+	| Moving Sprites
+	|--------------------------------------------------------------------------
+	 */
+
 	public static Sprite movingSprite(Sprite normal, Sprite x1, Sprite x2, int animate, int time) {
 		int calc = animate % time;
 		int diff = time / 3;
@@ -240,6 +246,9 @@ public class Sprite {
 		return SIZE;
 	}
 
+	public int[] getPixels() {
+		return _pixels;
+	}
 	public int getPixel(int i) {
 		return _pixels[i];
 	}
