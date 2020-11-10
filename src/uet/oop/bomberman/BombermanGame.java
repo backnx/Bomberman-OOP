@@ -6,10 +6,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 import uet.oop.bomberman.entities.Bomber;
-import uet.oop.bomberman.entities.person.Person;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.entities.tiles.Grass;
 import uet.oop.bomberman.entities.tiles.Wall;
@@ -22,12 +22,14 @@ public class BombermanGame extends Application {
     
     public static final int WIDTH = 20;
     public static final int HEIGHT = 15;
-    
+
+    public double speed = 0.1;
+
     private GraphicsContext gc;
     private Canvas canvas;
     private List<Entity> entities = new ArrayList<>();
     private List<Entity> stillObjects = new ArrayList<>();
-
+    private Entity bomberman;
 
 
     public static void main(String[] args) {
@@ -62,8 +64,23 @@ public class BombermanGame extends Application {
 
         createMap();
 
-        Entity bomberman = new Bomber(1, 1, Sprite.player_right.getFxImage());
+        bomberman = new Bomber(1, 1, Sprite.player_right.getFxImage());
         entities.add(bomberman);
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.RIGHT) {
+                bomberman.setX(bomberman.getX() + speed);
+            }
+            else if (event.getCode() == KeyCode.LEFT) {
+                bomberman.setX(bomberman.getX() - speed);
+            }
+            else if (event.getCode() == KeyCode.UP) {
+                bomberman.setY(bomberman.getY() - speed);
+            }
+            else if (event.getCode() == KeyCode.DOWN) {
+                bomberman.setY(bomberman.getY() + speed);
+            }
+        } );
+
 
     }
 
