@@ -14,17 +14,21 @@ import javafx.stage.Stage;
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
 import uet.oop.bomberman.entities.Entity;
+import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.entities.tiles.Grass;
 import uet.oop.bomberman.entities.tiles.Wall;
 import uet.oop.bomberman.graphics.Sprite;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class BombermanGame extends Application {
     
-    public static final int WIDTH = 40;
-    public static final int HEIGHT = 25;
+    public static final int WIDTH = 31;
+    public static final int HEIGHT = 13;
 
     public double speed = 1.0;
 
@@ -32,8 +36,11 @@ public class BombermanGame extends Application {
     private Canvas canvas;
     private List<Entity> entities = new ArrayList<>();
     private List<Entity> stillObjects = new ArrayList<>();
-    private Entity bomberman;
+    private Bomber bomberman;
 
+    public char[][] map = new char[HEIGHT][WIDTH];
+
+    Scanner scanner;
 
     public static void main(String[] args) {
         Application.launch(BombermanGame.class);
@@ -64,6 +71,11 @@ public class BombermanGame extends Application {
             }
         };
         timer.start();
+        try {
+            loadMap();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         createMap();
 
         bomberman = new Bomber(new Coordinate(1,1), Sprite.player_right.getFxImage());
@@ -74,19 +86,53 @@ public class BombermanGame extends Application {
 
     }
 
+    public void loadMap() throws FileNotFoundException {
+        scanner = new Scanner(new File("E:\\bomberman\\Bomberman-OOP\\res\\levels\\Level1.txt"));
+        int res;
+        for (int i = 0; i < 3; i++) {
+            res = scanner.nextInt();
+        }
+        String str;
+        str = scanner.nextLine();
+        for (int i = 0; i < HEIGHT; i++) {
+            str = scanner.nextLine();
+            for (int j = 0; j < WIDTH; j++) {
+                map[i][j] = str.charAt(j);
+            }
+        }
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                System.out.print(map[i][j] + " ");
+            }
+            System.out.println("");
+        }
+    }
     public void createMap() {
-        for (int i = 0; i < WIDTH; i++) {
-            for (int j = 0; j < HEIGHT; j++) {
-                Entity object;
-                if (j == 0 || j == HEIGHT - 1 || i == 0 || i == WIDTH - 1) {
-                    object = new Wall(new Coordinate(i,j), Sprite.wall.getFxImage());
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                Entity object = new Grass(new Coordinate(j,i), Sprite.grass.getFxImage());
+                if (map[i][j] == '#') {
+                    object = new Wall(new Coordinate(j,i), Sprite.wall.getFxImage());
                 }
-                else {
-                    object = new Grass(new Coordinate(i,j), Sprite.grass.getFxImage());
+                if (map[i][j] == '*') {
+                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
+                }
+                if (map[i][j] == 'x') {
+                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
+                }
+                if (map[i][j] == 's') {
+                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
+                }
+                if (map[i][j] == 'f') {
+                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
+                }
+                if (map[i][j] == 'b') {
+                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
                 }
                 stillObjects.add(object);
             }
         }
+        scanner.close();
     }
 
     public void update() {
