@@ -40,7 +40,7 @@ public abstract class Entity {
         return pos;
     }
 
-    public void setDir(Coordinate dir) {
+    protected void setDir(Coordinate dir) {
     }
     public Coordinate getDir(){
         return null;
