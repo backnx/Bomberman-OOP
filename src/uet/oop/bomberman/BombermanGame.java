@@ -21,16 +21,18 @@ import uet.oop.bomberman.graphics.Sprite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class BombermanGame extends Application {
     
-    public static final int WIDTH = 31;
-    public static final int HEIGHT = 13;
+    public static int WIDTH = 31;
+    public static int HEIGHT = 13;
 
     public double speed = 1.0;
+    public int level;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -38,7 +40,7 @@ public class BombermanGame extends Application {
     private List<Entity> stillObjects = new ArrayList<>();
     private Bomber bomberman;
 
-    public char[][] map = new char[HEIGHT][WIDTH];
+    public static char[][] map = new char[HEIGHT][WIDTH];
 
     Scanner scanner;
 
@@ -87,7 +89,7 @@ public class BombermanGame extends Application {
     }
 
     public void loadMap() throws FileNotFoundException {
-        scanner = new Scanner(new File("E:\\bomberman\\Bomberman-OOP\\res\\levels\\Level1.txt"));
+        scanner = new Scanner(new File("E:\\Bomberman-OOP\\res\\levels\\Level1.txt"));
         int res;
         for (int i = 0; i < 3; i++) {
             res = scanner.nextInt();
@@ -107,6 +109,7 @@ public class BombermanGame extends Application {
             System.out.println("");
         }
     }
+
     public void createMap() {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
