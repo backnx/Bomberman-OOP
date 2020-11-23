@@ -5,9 +5,16 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import uet.oop.bomberman.BombermanGame;
+import uet.oop.bomberman.entities.bomb.Bomb;
 import uet.oop.bomberman.graphics.Sprite;
+import uet.oop.bomberman.graphics.SpriteSheet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bomber extends Entity {
+    private List<Entity> bombs  = new ArrayList<>();
+    private int maxBombs = 2;
     public static final Coordinate UP = new Coordinate(0, -1);
     public static final Coordinate DOWN = new Coordinate(0, 1);
     public static final Coordinate LEFT = new Coordinate(-1, 0);
@@ -170,6 +177,16 @@ public class Bomber extends Entity {
         }
     }
 
+    protected void setBombs() {
+        pos = pos.add(dir.multiple(speed));
+        if (bombs.size() >= maxBombs) {
+            return;
+        }
+        double posX_bomb = (int) pos.x;
+        double posY_bomb = (int) pos.y;
+        bombs.add(new Bomb(new Coordinate(posX_bomb,posY_bomb), Sprite.bomb.getFxImage()));
+    }
+
     @Override
     protected void setDir(Coordinate dir) {
         this.dir.setTo(dir);
@@ -203,6 +220,8 @@ public class Bomber extends Entity {
                 dir.setTo(UP);
             } else if (event.getCode() == KeyCode.DOWN) {
                 dir.setTo(DOWN);
+            } else if (event.getCode() == KeyCode.SPACE) {
+                setBombs();
             }
             isMoving=true;
         }
@@ -242,5 +261,6 @@ public class Bomber extends Entity {
     public void render(GraphicsContext gc) {
         chooseSprite();
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
+        bombs.forEach(g -> g.render(gc));
     }
 }

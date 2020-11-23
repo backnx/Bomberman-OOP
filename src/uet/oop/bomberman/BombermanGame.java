@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
 import uet.oop.bomberman.entities.Entity;
+import uet.oop.bomberman.entities.bomb.Bomb;
 import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.entities.tiles.Grass;
 import uet.oop.bomberman.entities.tiles.Wall;
@@ -138,6 +139,8 @@ public class BombermanGame extends Application {
         scanner.close();
     }
 
+
+
     public void update() {
         entities.forEach(Entity::update);
     }
@@ -147,6 +150,7 @@ public class BombermanGame extends Application {
         stillObjects.forEach(g -> g.render(gc));
         entities.forEach(g -> g.render(gc));
     }
+
     public void handleEvent(Event event){
         bomberman.handleEvent((KeyEvent) event);
     }
