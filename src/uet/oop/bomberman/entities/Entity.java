@@ -10,7 +10,9 @@ public abstract class Entity {
 
     protected Coordinate dir=new Coordinate();
     protected Image img;
+    protected Image _img;
     protected Sprite sprite;
+    protected Sprite bombSprite;
 
     public Entity( Coordinate pos, Image img) {
         this.pos.setTo(pos);

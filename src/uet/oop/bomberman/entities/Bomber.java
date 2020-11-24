@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Bomber extends Entity {
-    private List<Entity> bombs  = new ArrayList<>();
-    private int maxBombs = 2;
     public static final Coordinate UP = new Coordinate(0, -1);
     public static final Coordinate DOWN = new Coordinate(0, 1);
     public static final Coordinate LEFT = new Coordinate(-1, 0);
@@ -27,6 +25,12 @@ public class Bomber extends Entity {
 
     protected int animate = 0;
     protected final int MAX_ANIMATE = 7500;
+
+    private int posX_bomb = 32;
+    private int posY_bomb = 14;
+
+    private List<Entity> bombs  = new ArrayList<>();
+    private int maxBombs = 2;
 
     /**
      * Hoat hinh
@@ -178,13 +182,19 @@ public class Bomber extends Entity {
     }
 
     protected void setBombs() {
-        pos = pos.add(dir.multiple(speed));
-        if (bombs.size() >= maxBombs) {
+        /*if (bombs.size() >= maxBombs) {
+            return;
+        }*/
+        if (posX_bomb != 32 && posY_bomb != 14) {
+            BombermanGame.map[posY_bomb][posX_bomb] = ' ';
+        }
+        posX_bomb = (int) Math.round(pos.x);
+        posY_bomb = (int) Math.round(pos.y);
+        if (BombermanGame.map[posY_bomb][posX_bomb] != ' ') {
             return;
         }
-        double posX_bomb = (int) pos.x;
-        double posY_bomb = (int) pos.y;
         bombs.add(new Bomb(new Coordinate(posX_bomb,posY_bomb), Sprite.bomb.getFxImage()));
+        BombermanGame.map[posY_bomb][posX_bomb] = 'b';
     }
 
     @Override
@@ -261,6 +271,8 @@ public class Bomber extends Entity {
     public void render(GraphicsContext gc) {
         chooseSprite();
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
-        bombs.forEach(g -> g.render(gc));
+        bombSprite = Sprite.movingSprite(Sprite.bomb,Sprite.bomb_1,Sprite.bomb_2, animate, 20);
+        _img = bombSprite.getFxImage();
+        gc.drawImage(_img, posX_bomb * Sprite.SCALED_SIZE, posY_bomb * Sprite.SCALED_SIZE);
     }
 }
