@@ -20,11 +20,25 @@ public class Sprite {
 	protected int _realHeight;
 	private SpriteSheet _sheet;
 
+	public int get_realWidth() {
+		return _realWidth;
+	}
+
+	public int get_realHeight() {
+		return _realHeight;
+	}
+	public int get_scaledWidth(){
+		return  _realWidth*2;
+	}
+	public int get_scaledHeight(){
+		return  _realHeight*2;
+	}
+
 	/*
-	|--------------------------------------------------------------------------
-	| Board sprites
-	|--------------------------------------------------------------------------
-	 */
+            |--------------------------------------------------------------------------
+            | Board sprites
+            |--------------------------------------------------------------------------
+             */
 	public static Sprite grass = new Sprite(DEFAULT_SIZE, 6, 0, SpriteSheet.tiles, 16, 16);
 	public static Sprite brick = new Sprite(DEFAULT_SIZE, 7, 0, SpriteSheet.tiles, 16, 16);
 	public static Sprite wall = new Sprite(DEFAULT_SIZE, 5, 0, SpriteSheet.tiles, 16, 16);
