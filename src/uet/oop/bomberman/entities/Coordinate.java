@@ -1,5 +1,7 @@
 package uet.oop.bomberman.entities;
 
+import uet.oop.bomberman.graphics.Sprite;
+
 public class Coordinate {
     double x;
     double y;
@@ -14,6 +16,13 @@ public class Coordinate {
         this.y = y;
     }
 
+    public static Coordinate floor(Coordinate c){
+        return new Coordinate(Math.floor(c.x),Math.floor(c.y));
+    }
+
+    public static Coordinate round(Coordinate c){
+        return new Coordinate(Math.round(c.x),Math.round(c.y));
+    }
     public Coordinate add(Coordinate c) {
         return new Coordinate(this.x + c.x, this.y + c.y);
     }
@@ -47,5 +56,16 @@ public class Coordinate {
 
     public Coordinate multiple(double c) {
         return new Coordinate(this.x * c, this.y * c);
+    }
+    public static int pixelToTile(double i) {
+        return (int)(i / Sprite.DEFAULT_SIZE);
+    }
+
+    public static int tileToPixel(int i) {
+        return i * Sprite.DEFAULT_SIZE;
+    }
+
+    public static int tileToPixel(double i) {
+        return (int)(i * Sprite.DEFAULT_SIZE);
     }
 }

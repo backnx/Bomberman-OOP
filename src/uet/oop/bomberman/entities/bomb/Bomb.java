@@ -15,16 +15,9 @@ public class Bomb extends Entity {
     protected int animate = 0;
     protected final int MAX_ANIMATE = 7500;
 
-    /**
-     * Hoat hinh
-     */
-    protected void animate() {
-        if(animate < MAX_ANIMATE) animate++;
-        else animate = 0;
-    }
-
     public Bomb(Coordinate pos, Image img) {
         super(pos, img);
+        sprite=Sprite.bomb;
     }
 
     @Override
