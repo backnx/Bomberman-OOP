@@ -210,7 +210,7 @@ public class Bomber extends Entity {
         flames.addAll(new Bomb(new Coordinate(posX_bomb, posY_bomb), Sprite.bomb.getFxImage()).getFlames());
     }
 
-    public Entity placeBomb() {
+    public Bomb placeBomb() {
         Bomb bom = new Bomb(Coordinate.round(pos),
                 Sprite.bomb.getFxImage(), this.bombRange);
         this.bombs.add(bom);
@@ -312,9 +312,9 @@ public class Bomber extends Entity {
     public void render(GraphicsContext gc) {
         chooseSprite();
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
-        bombSprite = Sprite.movingSprite(Sprite.bomb, Sprite.bomb_1, Sprite.bomb_2, animate, 20);
-        _img = bombSprite.getFxImage();
-        gc.drawImage(_img, posX_bomb * Sprite.SCALED_SIZE, posY_bomb * Sprite.SCALED_SIZE);
+        //bombSprite = Sprite.movingSprite(Sprite.bomb, Sprite.bomb_1, Sprite.bomb_2, animate, 20);
+        //_img = bombSprite.getFxImage();
+        //gc.drawImage(_img, posX_bomb * Sprite.SCALED_SIZE, posY_bomb * Sprite.SCALED_SIZE);
     }
 
     public void setKilled(boolean killed) {

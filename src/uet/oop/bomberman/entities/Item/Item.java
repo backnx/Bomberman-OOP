@@ -16,13 +16,11 @@ public abstract class Item extends Entity {
 
     //Collision Bomber
 
-    public boolean collision(Entity entities) {
-        rtg.setX(pos.getX());
-        rtg.setY(pos.getY());
-        if (this.rtg.intersects(entities.rtg.getLayoutBounds())) {
-            return true;
-        }
-        return false;
+    public boolean collision(Entity entity) {
+        entity.rtg.setY(entity.getY());
+        entity.rtg.setX(entity.getX());
+        System.out.println(this.rtg.intersects(entity.rtg.getLayoutBounds()));
+        return this.rtg.intersects(entity.rtg.getLayoutBounds());
     }
 
     @Override

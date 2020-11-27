@@ -199,6 +199,27 @@ public class Bomb extends Entity {
                 });
             }
         }
+        // damage entities
+        for (Entity x : entities) {
+            if (x instanceof Bomber || x instanceof Bomb) {
+                flames.forEach(flame -> {
+                    if (flame.rtg.intersects(x.rtg.getLayoutBounds())) {
+                        if (x instanceof Bomber) {
+                            ((Bomber) x).setKilled(true);
+                            damagedEntities.add(x);
+                        }
+                        // chain explosion
+                        if (x instanceof Bomb) {
+                            // if (((Bomb) x).getTickingCountDown() > 10)
+                            ((Bomb) x).setTickingCountDown(0);
+                            ((Bomb) x).getFlames().forEach(o -> {
+                                ((Flame) o).setExplosionCountDown(15);
+                            });
+                        }
+                    }
+                });
+            }
+        }
     }
 
 }
