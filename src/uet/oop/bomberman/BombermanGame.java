@@ -88,6 +88,7 @@ public class BombermanGame extends Application {
         createMap();
 
         bomberman = new Bomber(new Coordinate(1, 1), Sprite.player_right.getFxImage());
+        entities.add(bomberman);
 
         scene.setOnKeyReleased(this::handleEvent);
         scene.setOnKeyPressed(this::handleEvent);
@@ -163,12 +164,10 @@ public class BombermanGame extends Application {
 
 
     public void update() {
-        bomberman.update();
         updateDamagedObjects(); // enemies, bricks and flames
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
         updateItem();
-        stillObjects.forEach(Entity::update);
     }
 
     public void render() {
@@ -178,7 +177,6 @@ public class BombermanGame extends Application {
         entities.forEach(g -> g.render(gc));
         damagedObjects.forEach(g -> g.render(gc));
         flames.forEach(g -> g.render(gc));
-        bomberman.render(gc);
     }
 
     public void handleEvent(Event event) {
@@ -191,7 +189,7 @@ public class BombermanGame extends Application {
             // update bricks and enemies
             entities.forEach(o -> {
                 checkForDamagedEntities(o);
-                damagedObjects.forEach(this::updateStaticObjectsAndEnemies);
+                damagedObjects.forEach(this::updateDestroyableObjectsAndEnemies);
 
             });
 
@@ -220,12 +218,12 @@ public class BombermanGame extends Application {
 
                 // check if the bomb damange any objects
                 ((Bomb) o).handleFlameCollision(entities, destroyableObjects, damagedObjects);
-                System.out.println(entities.remove(o));
+                entities.remove(o);
             }
         }
     }
 
-    public void updateStaticObjectsAndEnemies(Entity br) {
+    public void updateDestroyableObjectsAndEnemies(Entity br) {
         if (br instanceof Brick) {
             if (((Brick) br).isDone()) {
 
