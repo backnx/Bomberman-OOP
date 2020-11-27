@@ -7,14 +7,17 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
 import uet.oop.bomberman.entities.Entity;
+import uet.oop.bomberman.entities.Item.BombsItem;
+import uet.oop.bomberman.entities.Item.FlameItem;
+import uet.oop.bomberman.entities.Item.Item;
+import uet.oop.bomberman.entities.Item.SpeedItem;
 import uet.oop.bomberman.entities.bomb.Bomb;
+import uet.oop.bomberman.entities.bomb.Flame;
 import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.entities.tiles.Grass;
 import uet.oop.bomberman.entities.tiles.Wall;
@@ -22,13 +25,13 @@ import uet.oop.bomberman.graphics.Sprite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Scanner;
 
 public class BombermanGame extends Application {
-    
+
     public static int WIDTH = 31;
     public static int HEIGHT = 13;
 
@@ -37,8 +40,11 @@ public class BombermanGame extends Application {
 
     private GraphicsContext gc;
     private Canvas canvas;
-    private List<Entity> entities = new ArrayList<>();
-    private List<Entity> stillObjects = new ArrayList<>();
+    public static List<Entity> entities = new ArrayList<>();
+    private List<Entity> stillObjects = new ArrayList<>();// contains Grass and Walls
+    public static List<Entity> destroyableObjects = new ArrayList<>(); // contains Items and Bricks
+    public static List<Entity> damagedObjects = new ArrayList<>();
+    public static List<Entity> flames = new ArrayList<>();
     private Bomber bomberman;
 
     public static char[][] map = new char[HEIGHT][WIDTH];
@@ -81,8 +87,7 @@ public class BombermanGame extends Application {
         }
         createMap();
 
-        bomberman = new Bomber(new Coordinate(1,1), Sprite.player_right.getFxImage());
-        entities.add(bomberman);
+        bomberman = new Bomber(new Coordinate(1, 1), Sprite.player_right.getFxImage());
 
         scene.setOnKeyReleased(this::handleEvent);
         scene.setOnKeyPressed(this::handleEvent);
@@ -90,7 +95,7 @@ public class BombermanGame extends Application {
     }
 
     public void loadMap() throws FileNotFoundException {
-        scanner = new Scanner(new File("E:\\Bomberman-OOP\\res\\levels\\Level1.txt"));
+        scanner = new Scanner(new File("res\\levels\\Level1.txt"));
         int res;
         for (int i = 0; i < 3; i++) {
             res = scanner.nextInt();
@@ -114,44 +119,168 @@ public class BombermanGame extends Application {
     public void createMap() {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
-                Entity object = new Grass(new Coordinate(j,i), Sprite.grass.getFxImage());
-                if (map[i][j] == '#') {
-                    object = new Wall(new Coordinate(j,i), Sprite.wall.getFxImage());
+                Entity object = new Grass(new Coordinate(j, i), Sprite.grass.getFxImage());
+                Coordinate pos_ = new Coordinate(j, i);
+                switch (map[i][j]) {
+                    case '#': {
+                        object = new Wall(pos_, Sprite.wall.getFxImage());
+                        stillObjects.add(object);
+                        break;
+                    }
+                    case '*': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        object = new Brick(pos_, Sprite.brick.getFxImage());
+                        destroyableObjects.add(object);
+                        break;
+                    }
+                    case 'b': {
+                        destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
+                                , new BombsItem(pos_, Sprite.powerup_speed.getFxImage())));
+                        map[i][j] = '*';
+                        break;
+                    }
+                    case 's':
+                        destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
+                                , new BombsItem(pos_, Sprite.powerup_bombs.getFxImage())));
+                        map[i][j] = '*';
+                        break;
+                    case 'f': {
+                        destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
+                                , new BombsItem(pos_, Sprite.powerup_flames.getFxImage())));
+                        map[i][j] = '*';
+                        break;
+                    }
+                    default: {
+                        object = new Grass(pos_, Sprite.grass.getFxImage());
+                        stillObjects.add(object);
+                        break;
+                    }
                 }
-                if (map[i][j] == '*') {
-                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
-                }
-                if (map[i][j] == 'x') {
-                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
-                }
-                if (map[i][j] == 's') {
-                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
-                }
-                if (map[i][j] == 'f') {
-                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
-                }
-                if (map[i][j] == 'b') {
-                    object = new Brick(new Coordinate(j,i), Sprite.brick.getFxImage());
-                }
-                stillObjects.add(object);
             }
+            scanner.close();
         }
-        scanner.close();
     }
 
 
-
     public void update() {
+        bomberman.update();
+        updateDamagedObjects(); // enemies, bricks and flames
         entities.forEach(Entity::update);
+        flames.forEach(Entity::update);
+        updateItem();
+        stillObjects.forEach(Entity::update);
     }
 
     public void render() {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         stillObjects.forEach(g -> g.render(gc));
+        destroyableObjects.forEach(g -> g.render(gc));
         entities.forEach(g -> g.render(gc));
+        damagedObjects.forEach(g -> g.render(gc));
+        flames.forEach(g -> g.render(gc));
+        bomberman.render(gc);
     }
 
-    public void handleEvent(Event event){
+    public void handleEvent(Event event) {
         bomberman.handleEvent((KeyEvent) event);
     }
+
+    public void updateDamagedObjects() {
+        try {
+
+            // update bricks and enemies
+            entities.forEach(o -> {
+                checkForDamagedEntities(o);
+                damagedObjects.forEach(this::updateStaticObjectsAndEnemies);
+
+            });
+
+            // get the explosion done (remove the flames)
+            flames.forEach(o -> {
+                if (o instanceof Flame) {
+                    if (((Flame) o).isDone()) {
+                        flames.remove(o);
+                    }
+                }
+            });
+        } catch (ConcurrentModificationException e) {
+            // System.out.println("were no errors to happen");
+        }
+
+
+    }
+
+    public void checkForDamagedEntities(Entity o) {
+        // remove bomb from the entites
+        if (o instanceof Bomb) {
+            if (((Bomb) o).isExploded()) {
+
+                // enable bomber go through the place used to be for the bomb
+                map[(int) o.getY()][(int) o.getX()] = ' ';
+
+                // check if the bomb damange any objects
+                ((Bomb) o).handleFlameCollision(entities, destroyableObjects, damagedObjects);
+                System.out.println(entities.remove(o));
+            }
+        }
+    }
+
+    public void updateStaticObjectsAndEnemies(Entity br) {
+        if (br instanceof Brick) {
+            if (((Brick) br).isDone()) {
+
+                Brick brick = (Brick) br;
+
+                // replace the tile with the grass
+                damagedObjects.remove(br);
+                destroyableObjects.remove(br);
+                Entity entity = new Grass(br.getPos(), Sprite.grass.getFxImage());
+                if (brick.getItem() != null) {
+
+                    if (brick.getItem() instanceof BombsItem) {
+                        entity = new BombsItem(br.getPos(), Sprite.powerup_bombs.getFxImage());
+                    }
+                    if (brick.getItem() instanceof SpeedItem) {
+                        entity = new SpeedItem(br.getPos(), Sprite.powerup_speed.getFxImage());
+                    }
+                    if (brick.getItem() instanceof FlameItem) {
+                        entity = new FlameItem(br.getPos(), Sprite.powerup_flames.getFxImage());
+                    }
+                    destroyableObjects.add(entity);
+                } else {
+                    stillObjects.add(entity);
+                }
+
+                // enable bomberman to go through the tile
+                map[(int) br.getY()][(int) br.getX()] = ' ';
+
+            } else {
+                br.update();
+            }
+        }
+    }
+
+    public void updateItem() {
+        int size = destroyableObjects.size();
+        for (int i = 0; i < size; i++) {
+            Entity o = destroyableObjects.get(i);
+            if (o instanceof Item) {
+                if (((Item) o).collision(bomberman)) {
+                    if (o instanceof SpeedItem) {
+                        bomberman.setSpeed(bomberman.getSpeed() + 0.01);
+                    } else if (o instanceof FlameItem) {
+                        bomberman.setBombRange(bomberman.getBombRange() + 1);
+                    } else if (o instanceof BombsItem) {
+                        bomberman.setBombLimit(bomberman.getBombLimit() + 1);
+                    }
+                    destroyableObjects.remove(i);
+                    Entity grass = new Grass(o.getPos(), Sprite.grass.getFxImage());
+                    stillObjects.add(grass);
+                    i--;
+                    size--;
+                }
+            }
+        }
+    }
+
 }

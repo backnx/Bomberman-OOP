@@ -296,4 +296,34 @@ public class Sprite {
 
 		return output;
 	}
+	public static Sprite bombTickingSprite(Sprite normal, Sprite x1, Sprite x2, int animate) {
+		if (animate < 10) {
+			return normal;
+		} else if (animate < 20) {
+			return x2;
+		} else if (animate < 30) {
+			return x1;
+		} else if (animate < 40) {
+			return normal;
+		} else if (animate < 50) {
+			return x1;
+		} else if (animate < 60) {
+			return x2;
+		} else if (animate < 70) {
+			return normal;
+		} else if (animate < 80) {
+			return x2;
+		} else {
+			return x1;
+		}
+	}
+	public static Sprite bombExplodeSprite(Sprite normal, Sprite x1, Sprite x2, int animate) {
+		if (animate < 5) {
+			return normal;
+		} else if (animate < 10) {
+			return x1;
+		} else {
+			return x2;
+		}
+	}
 }

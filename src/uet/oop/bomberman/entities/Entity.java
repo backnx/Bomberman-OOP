@@ -3,6 +3,7 @@ package uet.oop.bomberman.entities;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.shape.Rectangle;
 import uet.oop.bomberman.graphics.Sprite;
 
 public abstract class Entity {
@@ -13,6 +14,7 @@ public abstract class Entity {
     protected Image _img;
     protected Sprite sprite;
     protected Sprite bombSprite;
+    public Rectangle rtg=new Rectangle();
 
     public Entity( Coordinate pos, Image img) {
         this.pos.setTo(pos);

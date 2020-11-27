@@ -7,10 +7,11 @@ import javafx.scene.input.KeyEvent;
 import uet.oop.bomberman.BombermanGame;
 import uet.oop.bomberman.entities.bomb.Bomb;
 import uet.oop.bomberman.graphics.Sprite;
-import uet.oop.bomberman.graphics.SpriteSheet;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static uet.oop.bomberman.BombermanGame.*;
 
 public class Bomber extends Entity {
     public static final Coordinate UP = new Coordinate(0, -1);
@@ -18,10 +19,12 @@ public class Bomber extends Entity {
     public static final Coordinate LEFT = new Coordinate(-1, 0);
     public static final Coordinate RIGHT = new Coordinate(1, 0);
 
-    public static final Coordinate IDLE = new Coordinate(0, 0);
     private final Coordinate dir;
     private boolean isMoving = false;
-    private double speed = 0.05;
+    private double speed;
+    private boolean killed = false;
+    private int bombRange = 1;
+    public int bombLimit = 1;
 
     protected int animate = 0;
     protected final int MAX_ANIMATE = 7500;
@@ -29,31 +32,39 @@ public class Bomber extends Entity {
     private int posX_bomb = 32;
     private int posY_bomb = 14;
 
-    private List<Entity> bombs  = new ArrayList<>();
+    private List<Bomb> bombs = new ArrayList<>();
     private int maxBombs = 2;
 
     /**
      * Hoat hinh
      */
     protected void animate() {
-        if(animate < MAX_ANIMATE) animate++;
-        else animate = 0;
+        if (animate < MAX_ANIMATE) {
+            animate++;
+        } else {
+            animate = 0;
+        }
     }
 
     public Bomber(Coordinate pos, Image img) {
         super(pos, img);
         dir = new Coordinate();
+        speed=0.05;
     }
 
     @Override
     public void update() {
         animate();
         move();
+        if (!bombs.isEmpty()) {
+            if (bombs.get(bombs.size() - 1).isExploded()) {
+                bombs.remove(bombs.size() - 1);
+            }
+        }
     }
 
     public void checkMapMoveRight() {
-        double widthFrame = 24.0;
-        double distance = widthFrame / (double) Sprite.SCALED_SIZE;
+        double distance = 24.0 / (double) Sprite.SCALED_SIZE;
         int x1 = (int) (pos.x + speed);
         int x2 = (int) (pos.x + speed + distance);
         int y1 = (int) pos.y;
@@ -160,6 +171,7 @@ public class Bomber extends Entity {
         }
     }
 
+
     /*protected boolean movable() {
         Coordinate tmp = pos.add(dir.multiple(speed));
         if (tmp.y <= 1 || tmp.y == BombermanGame.HEIGHT - 1 || tmp.x <= 1 || tmp.x == BombermanGame.WIDTH - 1) {
@@ -186,15 +198,23 @@ public class Bomber extends Entity {
             return;
         }*/
         if (posX_bomb != 32 && posY_bomb != 14) {
-            BombermanGame.map[posY_bomb][posX_bomb] = ' ';
+            map[posY_bomb][posX_bomb] = ' ';
         }
         posX_bomb = (int) Math.round(pos.x);
         posY_bomb = (int) Math.round(pos.y);
-        if (BombermanGame.map[posY_bomb][posX_bomb] != ' ') {
+        if (map[posY_bomb][posX_bomb] != ' ') {
             return;
         }
-        bombs.add(new Bomb(new Coordinate(posX_bomb,posY_bomb), Sprite.bomb.getFxImage()));
-        BombermanGame.map[posY_bomb][posX_bomb] = 'b';
+        bombs.add(new Bomb(new Coordinate(posX_bomb, posY_bomb), Sprite.bomb.getFxImage()));
+        map[posY_bomb][posX_bomb] = 'b';
+        flames.addAll(new Bomb(new Coordinate(posX_bomb, posY_bomb), Sprite.bomb.getFxImage()).getFlames());
+    }
+
+    public Entity placeBomb() {
+        Bomb bom = new Bomb(Coordinate.round(pos),
+                Sprite.bomb.getFxImage(), this.bombRange);
+        this.bombs.add(bom);
+        return bom;
     }
 
     @Override
@@ -211,29 +231,50 @@ public class Bomber extends Entity {
     public void handleEvent(KeyEvent event) {
         if (event.getEventType().equals(KeyEvent.KEY_RELEASED)) {
             if (event.getCode() == KeyCode.RIGHT) {
-                dir.x=0;
+                dir.x = 0;
             } else if (event.getCode() == KeyCode.LEFT) {
-                dir.x=0;
+                dir.x = 0;
             } else if (event.getCode() == KeyCode.UP) {
-                dir.y=0;
+                dir.y = 0;
             } else if (event.getCode() == KeyCode.DOWN) {
-                dir.y=0;
+                dir.y = 0;
             }
-            isMoving=false;
-        }
-        else if(event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
-            if (event.getCode() == KeyCode.RIGHT) {
-                dir.setTo(RIGHT);
-            } else if (event.getCode() == KeyCode.LEFT) {
-                dir.setTo(LEFT);
-            } else if (event.getCode() == KeyCode.UP) {
-                dir.setTo(UP);
-            } else if (event.getCode() == KeyCode.DOWN) {
-                dir.setTo(DOWN);
-            } else if (event.getCode() == KeyCode.SPACE) {
-                setBombs();
+            isMoving = false;
+        } else if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
+            switch (event.getCode()) {
+                case RIGHT:
+                    dir.setTo(RIGHT);
+                    isMoving = true;
+                    break;
+                case LEFT:
+                    dir.setTo(LEFT);
+                    isMoving = true;
+                    break;
+                case UP:
+                    dir.setTo(UP);
+
+                    isMoving = true;
+                    break;
+                case DOWN:
+                    dir.setTo(DOWN);
+                    isMoving = true;
+                    break;
+                case SPACE:
+                    int curX = (int) Math.round(getX()), curY = (int) Math.round(getY());
+                    if (map[curY][curX] != 't') {
+                        if (bombs.size() < bombLimit) {
+
+                            // dat bom
+                            Entity bomb = placeBomb();
+                            entities.add(bomb);
+                            flames.addAll(((Bomb) bomb).getFlames());
+
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
-            isMoving=true;
         }
     }
 
@@ -264,15 +305,44 @@ public class Bomber extends Entity {
                 sprite = Sprite.movingSprite(Sprite.player_right_1, Sprite.player_right_2, animate, 20);
             }
         }
-        img=sprite.getFxImage();
+        img = sprite.getFxImage();
     }
+
 
     @Override
     public void render(GraphicsContext gc) {
         chooseSprite();
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
-        bombSprite = Sprite.movingSprite(Sprite.bomb,Sprite.bomb_1,Sprite.bomb_2, animate, 20);
+        bombSprite = Sprite.movingSprite(Sprite.bomb, Sprite.bomb_1, Sprite.bomb_2, animate, 20);
         _img = bombSprite.getFxImage();
         gc.drawImage(_img, posX_bomb * Sprite.SCALED_SIZE, posY_bomb * Sprite.SCALED_SIZE);
+    }
+
+    public void setKilled(boolean killed) {
+        this.killed = killed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public int getBombRange() {
+        return bombRange;
+    }
+
+    public void setBombRange(int bombRange) {
+        this.bombRange = bombRange;
+    }
+
+    public int getBombLimit() {
+        return bombLimit;
+    }
+
+    public void setBombLimit(int bombLimit) {
+        this.bombLimit = bombLimit;
     }
 }
