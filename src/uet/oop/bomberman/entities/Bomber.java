@@ -263,12 +263,11 @@ public class Bomber extends Entity {
                     int curX = (int) Math.round(getX()), curY = (int) Math.round(getY());
                     if (map[curY][curX] != 't') {
                         if (bombs.size() < bombLimit) {
-
                             // dat bom
                             Entity bomb = placeBomb();
                             entities.add(bomb);
                             flames.addAll(((Bomb) bomb).getFlames());
-
+                            map[curY][curX] = ' ';
                         }
                     }
                     break;
