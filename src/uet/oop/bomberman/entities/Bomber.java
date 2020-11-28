@@ -55,9 +55,18 @@ public class Bomber extends Entity {
     @Override
     public void update() {
         animate();
+        int curX,curY;
+        for (int i = 0; i < bombs.size(); i++) {
+            if (checkCollision(this, bombs.get(i))) {
+                curX = (int) bombs.get(i).pos.x; curY = (int) bombs.get(i).pos.y;
+                map[curY][curX] = 'B';
+            }
+        }
         move();
         if (!bombs.isEmpty()) {
             if (bombs.get(bombs.size() - 1).isExploded()) {
+                curX = (int) bombs.get(bombs.size() - 1).pos.x; curY = (int) bombs.get(bombs.size() - 1).pos.y;
+                map[curY][curX] = ' ';
                 bombs.remove(bombs.size() - 1);
             }
         }
@@ -82,7 +91,7 @@ public class Bomber extends Entity {
                         }
                     }
                 } else if (BombermanGame.map[(int) (pos.y + 1)][x2] != 0) {
-                    if (pos.y - (int) pos.y <= 0.1) {
+                    if (pos.y - (int) pos.y <= 0.3) {
                         pos.y = (int) pos.y;
                     } else {
                         pos.x = x2 - distance;
@@ -191,6 +200,7 @@ public class Bomber extends Entity {
         } else if (dir.equalTo(DOWN)) {
             checkMapMoveDown();
         }
+
     }
 
     protected void setBombs() {
@@ -252,7 +262,6 @@ public class Bomber extends Entity {
                     break;
                 case UP:
                     dir.setTo(UP);
-
                     isMoving = true;
                     break;
                 case DOWN:
@@ -266,8 +275,8 @@ public class Bomber extends Entity {
                             // dat bom
                             Entity bomb = placeBomb();
                             entities.add(bomb);
-                            flames.addAll(((Bomb) bomb).getFlames());
                             map[curY][curX] = ' ';
+                            flames.addAll(((Bomb) bomb).getFlames());
                         }
                     }
                     break;

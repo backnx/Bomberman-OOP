@@ -2,6 +2,7 @@ package uet.oop.bomberman.entities;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Rectangle;
 import uet.oop.bomberman.graphics.Sprite;
@@ -77,15 +78,45 @@ public abstract class Entity {
 
     public HashSet<String> getMask(Entity entity) {
         HashSet<String> mask = new HashSet<String>();
-        BufferedReader image = null;
-        try {
-            image = ImageIO.read(new File(entity.getImg()));
-        } catch (IOException e) {
-            System.out.println("Can't load file");
-        }
+        Image image = entity.getImg();
         int a, pixel;
-
+        PixelReader pixelReader = image.getPixelReader();
+        for (int i = 0; i < (int) image.getWidth(); i++) {
+            for (int j = 0; j < (int) image.getHeight(); j++) {
+                pixel = pixelReader.getArgb(i,j);
+                a = (pixel >> 24) & 0xff;
+                if (a != 0) {
+                    mask.add((int) (entity.pos.x * 32) + j + "," + ((int) (entity.pos.y * 32) - i));
+                }
+            }
+        }
+        return mask;
     }
+
+    public boolean checkCollision (Entity a, Entity b) {
+        double ax1 = a.getPos().x;
+        double ay1 = a.getPos().y;
+        double ax2 = ax1 + a.getImg().getWidth();
+        double ay2 = ay1 + a.getImg().getHeight();
+        double bx1 = b.getPos().x;
+        double by1 = b.getPos().y;
+        double bx2 = bx1 + b.getImg().getWidth();
+        double by2 = by1 + b.getImg().getHeight();
+
+        if (by2 < ay1 || ay2 < by1 || bx2 < ax1 || ax2 < bx1) {
+            return false;
+        }
+        else {
+            HashSet<String> maskPlayer1 = getMask(a);
+            HashSet<String> maskPlayer2 = getMask(b);
+            maskPlayer1.retainAll(maskPlayer2);
+            if(maskPlayer1.size() > 0){
+                return false;
+            }
+        }
+        return true;
+    }
+
     public abstract void update();
     public abstract void handleEvent(KeyEvent event);
 }

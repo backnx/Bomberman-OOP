@@ -115,7 +115,6 @@ public class Bomb extends Entity {
             map[(int) getY()] [(int) getX()]=' ';
             System.out.println(map[(int) getY()]);
             explodingImg();
-
         }
     }
 
