@@ -136,18 +136,18 @@ public class BombermanGame extends Application {
                     }
                     case 'b': {
                         destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
-                                , new BombsItem(pos_, Sprite.powerup_speed.getFxImage())));
+                                , new BombsItem(pos_, Sprite.powerup_bombs.getFxImage())));
                         map[i][j] = '*';
                         break;
                     }
                     case 's':
                         destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
-                                , new BombsItem(pos_, Sprite.powerup_bombs.getFxImage())));
+                                , new SpeedItem(pos_, Sprite.powerup_speed.getFxImage())));
                         map[i][j] = '*';
                         break;
                     case 'f': {
                         destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
-                                , new BombsItem(pos_, Sprite.powerup_flames.getFxImage())));
+                                , new FlameItem(pos_, Sprite.powerup_flames.getFxImage())));
                         map[i][j] = '*';
                         break;
                     }
@@ -265,7 +265,7 @@ public class BombermanGame extends Application {
             if (o instanceof Item) {
                 if (((Item) o).collision(bomberman)) {
                     if (o instanceof SpeedItem) {
-                        bomberman.setSpeed(bomberman.getSpeed() + 0.01);
+                        bomberman.setSpeed(bomberman.getSpeed() + 0.02);
                     } else if (o instanceof FlameItem) {
                         bomberman.setBombRange(bomberman.getBombRange() + 1);
                     } else if (o instanceof BombsItem) {
