@@ -6,6 +6,13 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Rectangle;
 import uet.oop.bomberman.graphics.Sprite;
 
+import javax.imageio.ImageIO;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+
 public abstract class Entity {
     protected Coordinate pos=new Coordinate();
 
@@ -66,6 +73,18 @@ public abstract class Entity {
 //        Image base = iv.snapshot(params, null);
 
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
+    }
+
+    public HashSet<String> getMask(Entity entity) {
+        HashSet<String> mask = new HashSet<String>();
+        BufferedReader image = null;
+        try {
+            image = ImageIO.read(new File(entity.getImg()));
+        } catch (IOException e) {
+            System.out.println("Can't load file");
+        }
+        int a, pixel;
+
     }
     public abstract void update();
     public abstract void handleEvent(KeyEvent event);
