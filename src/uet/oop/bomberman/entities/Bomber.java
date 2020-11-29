@@ -25,50 +25,53 @@ public class Bomber extends Entity {
     private boolean killed = false;
     private int bombRange = 1;
     public int bombLimit = 1;
-
-    protected int animate = 0;
-    protected final int MAX_ANIMATE = 7500;
+    protected final int MAX_DEAD_ANIMATE_LOOP = 5;
 
     private int posX_bomb = 32;
     private int posY_bomb = 14;
 
     private List<Bomb> bombs = new ArrayList<>();
     private int maxBombs = 2;
+    private int dead_animate_loop = MAX_DEAD_ANIMATE_LOOP;
 
     /**
      * Hoat hinh
      */
     protected void animate() {
-        if (animate < MAX_ANIMATE) {
-            animate++;
+        if (!isKilled()) {
+            if (animate < MAX_ANIMATE) {
+                animate++;
+            } else {
+                animate = 0;
+            }
         } else {
-            animate = 0;
+            if (dead_animate_loop == MAX_DEAD_ANIMATE_LOOP) {
+                animate = 0;
+                dead_animate_loop--;
+            }
+            if (dead_animate_loop == 0) {
+                return;
+            }
+            if (animate < 15) {
+                animate++;
+            } else {
+                animate = 0;
+                dead_animate_loop--;
+            }
         }
     }
 
     public Bomber(Coordinate pos, Image img) {
         super(pos, img);
         dir = new Coordinate();
-        speed=0.05;
+        speed = 0.05;
     }
 
     @Override
     public void update() {
         animate();
-        int curX,curY;
-        for (int i = 0; i < bombs.size(); i++) {
-            if (checkCollision(this, bombs.get(i))) {
-                curX = (int) bombs.get(i).pos.x; curY = (int) bombs.get(i).pos.y;
-                map[curY][curX] = 'B';
-            }
-        }
-        move();
-        if (!bombs.isEmpty()) {
-            if (bombs.get(bombs.size() - 1).isExploded()) {
-                curX = (int) bombs.get(bombs.size() - 1).pos.x; curY = (int) bombs.get(bombs.size() - 1).pos.y;
-                map[curY][curX] = ' ';
-                bombs.remove(bombs.size() - 1);
-            }
+        if (!isKilled()) {
+            move();
         }
     }
 
@@ -200,24 +203,10 @@ public class Bomber extends Entity {
         } else if (dir.equalTo(DOWN)) {
             checkMapMoveDown();
         }
+        while(!bombs.isEmpty() && bombs.get(bombs.size() - 1).isExploded()) {
+            bombs.remove(bombs.size() - 1);
 
-    }
-
-    protected void setBombs() {
-        /*if (bombs.size() >= maxBombs) {
-            return;
-        }*/
-        if (posX_bomb != 32 && posY_bomb != 14) {
-            map[posY_bomb][posX_bomb] = ' ';
         }
-        posX_bomb = (int) Math.round(pos.x);
-        posY_bomb = (int) Math.round(pos.y);
-        if (map[posY_bomb][posX_bomb] != ' ') {
-            return;
-        }
-        bombs.add(new Bomb(new Coordinate(posX_bomb, posY_bomb), Sprite.bomb.getFxImage()));
-        map[posY_bomb][posX_bomb] = 'b';
-        flames.addAll(new Bomb(new Coordinate(posX_bomb, posY_bomb), Sprite.bomb.getFxImage()).getFlames());
     }
 
     public Bomb placeBomb() {
@@ -273,10 +262,10 @@ public class Bomber extends Entity {
                     if (map[curY][curX] != 't') {
                         if (bombs.size() < bombLimit) {
                             // dat bom
-                            Entity bomb = placeBomb();
+                            Bomb bomb = placeBomb();
                             entities.add(bomb);
+                            flames.addAll( bomb.getFlames());
                             map[curY][curX] = ' ';
-                            flames.addAll(((Bomb) bomb).getFlames());
                         }
                     }
                     break;
@@ -287,31 +276,35 @@ public class Bomber extends Entity {
     }
 
     private void chooseSprite() {
-        if (dir.equalTo(UP)) {
-            sprite = Sprite.player_up;
-            if (isMoving) {
-                sprite = Sprite.movingSprite(Sprite.player_up_1, Sprite.player_up_2, animate, 20);
-            }
-        } else if (dir.equalTo(RIGHT)) {
-            sprite = Sprite.player_right;
-            if (isMoving) {
-                sprite = Sprite.movingSprite(Sprite.player_right_1, Sprite.player_right_2, animate, 20);
-            }
-        } else if (dir.equalTo(DOWN)) {
-            sprite = Sprite.player_down;
-            if (isMoving) {
-                sprite = Sprite.movingSprite(Sprite.player_down_1, Sprite.player_down_2, animate, 20);
-            }
-        } else if (dir.equalTo(LEFT)) {
-            sprite = Sprite.player_left;
-            if (isMoving) {
-                sprite = Sprite.movingSprite(Sprite.player_left_1, Sprite.player_left_2, animate, 20);
+        if (!isKilled()) {
+            if (dir.equalTo(UP)) {
+                sprite = Sprite.player_up;
+                if (isMoving) {
+                    sprite = Sprite.movingSprite(Sprite.player_up_1, Sprite.player_up_2, animate, 20);
+                }
+            } else if (dir.equalTo(RIGHT)) {
+                sprite = Sprite.player_right;
+                if (isMoving) {
+                    sprite = Sprite.movingSprite(Sprite.player_right_1, Sprite.player_right_2, animate, 20);
+                }
+            } else if (dir.equalTo(DOWN)) {
+                sprite = Sprite.player_down;
+                if (isMoving) {
+                    sprite = Sprite.movingSprite(Sprite.player_down_1, Sprite.player_down_2, animate, 20);
+                }
+            } else if (dir.equalTo(LEFT)) {
+                sprite = Sprite.player_left;
+                if (isMoving) {
+                    sprite = Sprite.movingSprite(Sprite.player_left_1, Sprite.player_left_2, animate, 20);
+                }
+            } else {
+                sprite = Sprite.player_right;
+                if (isMoving) {
+                    sprite = Sprite.movingSprite(Sprite.player_right_1, Sprite.player_right_2, animate, 20);
+                }
             }
         } else {
-            sprite = Sprite.player_right;
-            if (isMoving) {
-                sprite = Sprite.movingSprite(Sprite.player_right_1, Sprite.player_right_2, animate, 20);
-            }
+            sprite = Sprite.bombExplodeSprite(Sprite.player_dead1, Sprite.player_dead2, Sprite.player_dead3, animate);
         }
         img = sprite.getFxImage();
     }
@@ -328,6 +321,10 @@ public class Bomber extends Entity {
 
     public void setKilled(boolean killed) {
         this.killed = killed;
+    }
+
+    public boolean isKilled() {
+        return killed;
     }
 
     public void setSpeed(double speed) {

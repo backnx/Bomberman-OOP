@@ -23,7 +23,18 @@ public abstract class Entity {
     protected Sprite sprite;
     protected Sprite bombSprite;
     public Rectangle rtg=new Rectangle();
+    protected int animate;
 
+
+    protected final int MAX_ANIMATE = 7500;
+    protected void animate() {
+
+            if (animate < MAX_ANIMATE) {
+                animate++;
+            } else {
+                animate = 0;
+            }
+    }
     public Entity( Coordinate pos, Image img) {
         this.pos.setTo(pos);
         this.img = img;

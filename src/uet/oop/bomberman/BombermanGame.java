@@ -45,7 +45,7 @@ public class BombermanGame extends Application {
     public static List<Entity> destroyableObjects = new ArrayList<>(); // contains Items and Bricks
     public static List<Entity> damagedObjects = new ArrayList<>();
     public static List<Entity> flames = new ArrayList<>();
-    public Bomber bomberman;
+    public static Bomber bomberman;
 
     public static char[][] map = new char[HEIGHT][WIDTH];
 
@@ -217,7 +217,7 @@ public class BombermanGame extends Application {
                 map[(int) o.getY()][(int) o.getX()] = ' ';
 
                 // check if the bomb damange any objects
-                ((Bomb) o).handleFlameCollision(entities, destroyableObjects, damagedObjects);
+                ((Bomb) o).handleFlameCollision();
                 entities.remove(o);
             }
         }
