@@ -32,6 +32,8 @@ public class Bomber extends Entity {
     private int posX_bomb = 32;
     private int posY_bomb = 14;
 
+    public static int score = 0;
+    public static int time = 0;
     private List<Bomb> bombs = new ArrayList<>();
     private int maxBombs = 2;
 
@@ -58,11 +60,13 @@ public class Bomber extends Entity {
         int curX,curY;
         for (int i = 0; i < bombs.size(); i++) {
             if (checkCollision(this, bombs.get(i))) {
-                curX = (int) bombs.get(i).pos.x; curY = (int) bombs.get(i).pos.y;
+                curX = (int) bombs.get(i).pos.x; curY = (int) (bombs.get(i).pos.y);
                 map[curY][curX] = 'B';
             }
         }
+
         move();
+
         if (!bombs.isEmpty()) {
             if (bombs.get(bombs.size() - 1).isExploded()) {
                 curX = (int) bombs.get(bombs.size() - 1).pos.x; curY = (int) bombs.get(bombs.size() - 1).pos.y;
@@ -188,7 +192,6 @@ public class Bomber extends Entity {
         }
         return true;
     }*/
-
     protected void move() {
         pos = pos.add(dir.multiple(speed));
         if (dir.equalTo(RIGHT)) {
@@ -200,7 +203,6 @@ public class Bomber extends Entity {
         } else if (dir.equalTo(DOWN)) {
             checkMapMoveDown();
         }
-
     }
 
     protected void setBombs() {
