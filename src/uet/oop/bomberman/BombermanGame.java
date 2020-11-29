@@ -41,7 +41,7 @@ public class BombermanGame extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
     public static List<Entity> entities = new ArrayList<>();
-    private List<Entity> stillObjects = new ArrayList<>();// contains Grass and Walls
+    public static List<Entity> stillObjects = new ArrayList<>();// contains Grass and Walls
     public static List<Entity> destroyableObjects = new ArrayList<>(); // contains Items and Bricks
     public static List<Entity> damagedObjects = new ArrayList<>();
     public static List<Entity> flames = new ArrayList<>();
