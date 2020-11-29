@@ -17,12 +17,12 @@ import static uet.oop.bomberman.BombermanGame.*;
 public class Bomb extends Entity {
 
     private int bombLevel = 3;
-    private List<Entity> flames = new ArrayList<>();
+    private List<Flame> flames = new ArrayList<>();
     private boolean exploded = false;
     private int explosionCountDown = 15;
     private int tickingCountDown = 90;
 
-    public List<Entity> getFlames() {
+    public List<Flame> getFlames() {
         return flames;
     }
 
@@ -90,12 +90,12 @@ public class Bomb extends Entity {
 
     @Override
     public void update() {
-        if (!exploded) {
+        if (!isExploded()) {
             tickingImg();
         } else {
             char[] mapz = map[(int) getY()];
             System.out.println(mapz);
-            map[(int) getY()] [(int) getX()]=' ';
+            map[(int) getY()][(int) getX()] = ' ';
             System.out.println("heloo");
             explodingImg();
         }
@@ -108,7 +108,7 @@ public class Bomb extends Entity {
 
     public void tickingImg() {
         if (tickingCountDown <= 0) {
-            exploded=true;
+            setExploded(true);
         } else {
             this.img = Sprite
                     .bombTickingSprite(Sprite.bomb, Sprite.bomb_1, Sprite.bomb_2, tickingCountDown)
@@ -137,7 +137,7 @@ public class Bomb extends Entity {
                 flames.forEach(flame -> {
                     int oX = (int) o.getX(), fX = (int) flame.getX(), x = (int) this.getX();
                     int oY = (int) o.getY(), fY = (int) flame.getY(), y = (int) this.getY();
-                    String position = ((Flame) flame).getPosition();
+                    String position = flame.getPosition();
 
                     if (!position.equals("left_most") && !position.equals("down_most") &&
                             !position.equals("right_most") && !position.equals("top_most")) {
@@ -159,26 +159,31 @@ public class Bomb extends Entity {
         }
         // damage entities
         for (Entity x : entities) {
-            if (x instanceof Bomber || x instanceof Bomb) {
+            if (x instanceof Bomber) {
                 flames.forEach(flame -> {
-                    if (flame.rtg.intersects(x.rtg.getLayoutBounds())) {
-                        if (x instanceof Bomber) {
-                            ((Bomber) x).setKilled(true);
-                        }
-                        // chain explosion
-                        if (x instanceof Bomb) {
-                            // if (((Bomb) x).getTickingCountDown() > 10)
-                            ((Bomb) x).setTickingCountDown(0);
-                            ((Bomb) x).getFlames().forEach(o -> {
-                                ((Flame) o).setExplosionCountDown(15);
-                            });
-                        }
+                    if (checkCollision(flame, x)) {
+                        ((Bomber) x).setKilled(true);
+                        System.out.println("hit");
+                    }
+                });
+            }
+            // chain explosion
+            if (x instanceof Bomb) {
+                flames.forEach(flame -> {
+                    if (checkCollision(flame, x)) {
+                        ((Bomb) x).setTickingCountDown(0);
+                        ((Bomb) x).getFlames().forEach(o -> {
+                            o.setExplosionCountDown(15);
+                        });
                     }
                 });
             }
         }
     }
 
+    public void setExploded(boolean exploded) {
+        this.exploded = exploded;
+    }
 }
 
 

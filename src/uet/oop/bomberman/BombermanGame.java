@@ -44,7 +44,7 @@ public class BombermanGame extends Application {
     public static List<Entity> stillObjects = new ArrayList<>();// contains Grass and Walls
     public static List<Entity> destroyableObjects = new ArrayList<>(); // contains Items and Bricks
     public static List<Entity> damagedObjects = new ArrayList<>();
-    public static List<Entity> flames = new ArrayList<>();
+    public static List<Flame> flames = new ArrayList<>();
     public static Bomber bomberman;
 
     public static char[][] map = new char[HEIGHT][WIDTH];

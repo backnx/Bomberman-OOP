@@ -121,11 +121,8 @@ public abstract class Entity {
             HashSet<String> maskPlayer1 = getMask(a);
             HashSet<String> maskPlayer2 = getMask(b);
             maskPlayer1.retainAll(maskPlayer2);
-            if(maskPlayer1.size() > 0){
-                return false;
-            }
+            return maskPlayer1.size() > 0;
         }
-        return true;
     }
 
     public abstract void update();

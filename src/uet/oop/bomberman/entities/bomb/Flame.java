@@ -39,12 +39,14 @@ public class Flame extends Entity {
     public Flame(Coordinate pos, Image img) {
         super(pos, img);
         rtg = new Rectangle(pos.getX(),pos.getY(), 0.99, 0.99);
+        explodingImg();
     }
 
     public Flame(Coordinate pos, Image img, String position) {
         super(pos, img);
         rtg = new Rectangle(pos.getX(),pos.getY(), 0.99, 0.99);
         this.position = position;
+        explodingImg();
     }
 
 
