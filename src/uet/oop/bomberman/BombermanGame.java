@@ -11,6 +11,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
+import uet.oop.bomberman.entities.Enemy.Balloon;
+import uet.oop.bomberman.entities.Enemy.Doll;
+import uet.oop.bomberman.entities.Enemy.Enemy;
+import uet.oop.bomberman.entities.Enemy.Oneal;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.entities.Item.BombsItem;
 import uet.oop.bomberman.entities.Item.FlameItem;
@@ -46,6 +50,7 @@ public class BombermanGame extends Application {
     public static List<Entity> damagedObjects = new ArrayList<>();
     public static List<Flame> flames = new ArrayList<>();
     public static Bomber bomberman;
+    public static int enemyCnt;
 
     public static char[][] map = new char[HEIGHT][WIDTH];
 
@@ -151,6 +156,27 @@ public class BombermanGame extends Application {
                         map[i][j] = '*';
                         break;
                     }
+                    case '1': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Enemy enemy = new Balloon(pos_, Sprite.balloom_left1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
+                        break;
+                    }
+                    case '2': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Entity enemy = new Oneal(pos_, Sprite.oneal_left1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
+                        break;
+                    }
+                    case '3': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Entity enemy = new Doll(pos_, Sprite.doll_right1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
+                        break;
+                    }
                     default: {
                         object = new Grass(pos_, Sprite.grass.getFxImage());
                         stillObjects.add(object);
@@ -254,6 +280,10 @@ public class BombermanGame extends Application {
 
             } else {
                 br.update();
+            }
+        } else if (br instanceof Enemy) {
+            if (br.getImg() == null) {
+                entities.remove(br);
             }
         }
     }

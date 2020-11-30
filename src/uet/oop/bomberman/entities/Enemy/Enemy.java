@@ -8,18 +8,23 @@ import uet.oop.bomberman.entities.Coordinate;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.graphics.Sprite;
 
+import static uet.oop.bomberman.BombermanGame.*;
+
 public abstract class Enemy extends Entity {
     public static final Coordinate UP = new Coordinate(0, -1);
     public static final Coordinate DOWN = new Coordinate(0, 1);
     public static final Coordinate LEFT = new Coordinate(-1, 0);
     public static final Coordinate RIGHT = new Coordinate(1, 0);
 
+    private int input=1;
     private final Coordinate dir;
     protected double speed=0.025;
     protected int life=2;
     private boolean damaged=false;
     private boolean killed = false;
     protected final int MAX_DEAD_ANIMATE_LOOP = 5;
+    
+    private boolean throughWall=false;
 
     private int dead_animate_loop = MAX_DEAD_ANIMATE_LOOP;
 
@@ -72,7 +77,7 @@ public abstract class Enemy extends Entity {
             setDamaged(false);
             life = 0;
         }
-        if (!isKilled()) {
+        if (life!=0) {
             move();
         }
     }
@@ -88,123 +93,114 @@ public abstract class Enemy extends Entity {
     }*/
 
     protected void move() {
-        pos = pos.add(dir.multiple(speed));
-        if (dir.equalTo(RIGHT)) {
-            checkMapMoveRight();
-        } else if (dir.equalTo(LEFT)) {
-            checkMapMoveLeft();
-        } else if (dir.equalTo(UP)) {
-            checkMapMoveUp();
-        } else if (dir.equalTo(DOWN)) {
-            checkMapMoveDown();
+        handleEvent();
+    }
+
+    public boolean checkMapMoveRight() {
+        if (pos.x - Math.floor(pos.x) == 0) {
+            if (!throughWall) {
+                if (map[(int) pos.y][(int)pos.x+1] != '*' &&
+                        map[(int) pos.y][(int)pos.x+1] != '#' &&
+                        map[(int) pos.y][(int)pos.x+1] != 'w' &&
+                        map[(int) pos.y][(int)pos.x+1] != 't') {
+                    pos.x = (double) Math.round((pos.x + speed) * 1000) / 1000;
+                    return true;
+                }
+                return false;
+            } else {
+                if (map[(int) pos.y][(int)pos.x+1] != '#') {
+                    pos.x = (double) Math.round((pos.x + speed) * 1000) / 1000;
+                    return true;
+                }
+                return false;
+            }
+        } else {
+            pos.x = (double) Math.round((pos.x + speed) * 1000) / 1000;
+            return true;
+        }
+
+    }
+
+    public boolean checkMapMoveLeft() {
+        if (pos.x - Math.floor(pos.x) == 0) {
+            if (!throughWall) {
+                if (map[(int) pos.y][(int) pos.x - 1] != '*' &&
+                        map[(int) pos.y][(int) pos.x - 1] != '#' &&
+                        map[(int) pos.y][(int) pos.x - 1] != 'w' &&
+                        map[(int) pos.y][(int) pos.x - 1] != 't') {
+                    pos.x = (double) Math.round((pos.x - speed) * 1000) / 1000;
+                     
+                    return true;
+                }
+                return false;
+            } else {
+                if (map[(int) pos.y][(int) pos.x - 1] != '#') {
+                    pos.x = (double) Math.round((pos.x - speed) * 1000) / 1000;
+                     
+                    return true;
+                }
+                return false;
+            }
+        } else {
+            pos.x = (double) Math.round((pos.x - speed) * 1000) / 1000;
+             
+            return true;
+        }
+
+    }
+
+    public boolean checkMapMoveUp() {
+        if (pos.y - Math.floor(pos.y) == 0) {
+            if (!throughWall) {
+                if (map[(int) pos.y - 1] [(int) pos.x] != '*' &&
+                        map[(int) pos.y - 1] [(int) pos.x] != '#' &&
+                        map[(int) pos.y - 1] [(int) pos.x] != 'w' &&
+                        map[(int) pos.y - 1] [(int) pos.x] != 't') {
+                    pos.y = (double) Math.round((pos.y - speed) * 1000) / 1000;
+                     
+                    return true;
+                }
+                return false;
+            } else {
+                if (map[(int) pos.y - 1] [(int) pos.x] != '#') {
+                    pos.y = (double) Math.round((pos.y - speed) * 1000) / 1000;
+                     
+                    return true;
+                }
+                return false;
+            }
+        } else {
+            pos.y = (double) Math.round((pos.y - speed) * 1000) / 1000;
+             
+            return true;
         }
     }
 
-    public void checkMapMoveRight() {
-        double distance = 24.0 / (double) Sprite.SCALED_SIZE;
-        int x1 = (int) (pos.x + speed);
-        int x2 = (int) (pos.x + speed + distance);
-        int y1 = (int) pos.y;
-        int y2 = (int) (pos.y + 1);
-        if (x1 >= 0 && x2 < BombermanGame.WIDTH && y1 >= 0 && y2 < BombermanGame.HEIGHT) {
-            if (BombermanGame.map[y1][x2] != ' ' || BombermanGame.map[y2][x2] != ' ') {
-                if (BombermanGame.map[(int) pos.y][x2] != ' ') {
-                    if (pos.y == (int) pos.y) {
-                        pos.x = x2 - distance;
-                    } else {
-                        if (pos.y - (int) pos.y >= 0.7) {
-                            pos.y = (int) pos.y + 1;
-                        } else {
-                            pos.x = x2 - distance;
-                        }
-                    }
-                } else if (BombermanGame.map[(int) (pos.y + 1)][x2] != 0) {
-                    if (pos.y - (int) pos.y <= 0.3) {
-                        pos.y = (int) pos.y;
-                    } else {
-                        pos.x = x2 - distance;
-                    }
-                }
-            }
-        }
-    }
 
-    public void checkMapMoveLeft() {
-        int x1 = (int) (pos.x - speed);
-        int y1 = (int) pos.y;
-        int y2 = (int) (pos.y + 1);
-        if (x1 >= 0 && x1 < BombermanGame.WIDTH && y1 >= 0 && y2 < BombermanGame.HEIGHT) {
-            if (BombermanGame.map[y1][x1] != ' ' || BombermanGame.map[y2][x1] != ' ') {
-                if (BombermanGame.map[(int) pos.y][x1] != ' ') {
-                    if (pos.y == (int) pos.y) {
-                        pos.x = x1 + 1;
-                    } else {
-                        if (pos.y - (int) pos.y >= 0.7) {
-                            pos.y = (int) pos.y + 1;
-                        } else {
-                            pos.x = x1 + 1;
-                        }
-                    }
-                } else if (BombermanGame.map[(int) (pos.y + 1)][x1] != ' ') {
-                    if (pos.y - (int) pos.y <= 0.3) {
-                        pos.y = (int) pos.y;
-                    } else {
-                        pos.x = x1 + 1;
-                    }
+    public boolean checkMapMoveDown() {
+        if (pos.y - Math.floor(pos.y) == 0) {
+            if (!throughWall) {
+                if (map[(int) pos.y + 1] [(int) pos.x] != '*' &&
+                        map[(int) pos.y + 1] [(int) pos.x] != '#' &&
+                        map[(int) pos.y + 1] [(int) pos.x] != 'w' &&
+                        map[(int) pos.y + 1] [(int) pos.x] != 't') {
+                    pos.y = (double) Math.round((pos.y + speed) * 1000) / 1000;
+                     
+                    return true;
                 }
-            }
-        }
-    }
-
-    public void checkMapMoveUp() {
-        double widthFrame = 24.0;
-        double distance = widthFrame / (double) Sprite.SCALED_SIZE;
-        int x1 = (int) (pos.x);
-        int x2 = (int) (pos.x + distance);
-        int y1 = (int) pos.y;
-        int y2 = (int) (pos.y - speed);
-        if (x1 >= 0 && x2 < BombermanGame.WIDTH && y1 >= 0 && y2 < BombermanGame.HEIGHT) {
-            if (BombermanGame.map[y2][x1] != ' ' || BombermanGame.map[y2][x2] != ' ') {
-                if (BombermanGame.map[y2][x1] != ' ') {
-                    if (pos.x - (int) pos.x >= 0.7) {
-                        pos.x = (int) pos.x + 1;
-                    } else {
-                        pos.y = y2 + 1;
-                    }
-                } else if (BombermanGame.map[y2][x2] != 0) {
-                    if (pos.x - (int) pos.x <= 0.45) {
-                        pos.x = (int) pos.x + 1 - distance;
-                    } else {
-                        pos.y = y2 + 1;
-                    }
+                return false;
+            } else {
+                if (map[(int) pos.y + 1] [(int) pos.x] != '#') {
+                    pos.y = (double) Math.round((pos.y + speed) * 1000) / 1000;
+                     
+                    return true;
                 }
+                return false;
             }
-        }
-    }
-
-    public void checkMapMoveDown() {
-        double widthFrame = 24.0;
-        double distance = widthFrame / (double) Sprite.SCALED_SIZE;
-        int x1 = (int) (pos.x);
-        int x2 = (int) (pos.x + distance);
-        int y1 = (int) (pos.y + speed);
-        int y2 = (int) (pos.y + speed + 1);
-        if (x1 >= 0 && x2 < BombermanGame.WIDTH && y1 >= 0 && y2 < BombermanGame.HEIGHT) {
-            if (BombermanGame.map[y2][x1] != ' ' || BombermanGame.map[y2][x2] != ' ') {
-                if (BombermanGame.map[(int) (pos.y + 1)][x1] != ' ') {
-                    if (pos.x - (int) pos.x >= 0.7) {
-                        pos.x = (int) pos.x + 1;
-                    } else {
-                        pos.y = y1;
-                    }
-                } else if (BombermanGame.map[(int) (pos.y + 1)][x2] != 0) {
-                    if (pos.x - (int) pos.x <= 0.45) {
-                        pos.x = (int) pos.x + 1 - distance;
-                    } else {
-                        pos.y = y1;
-                    }
-                }
-            }
+        } else {
+            pos.y = (double) Math.round((pos.y + speed) * 1000) / 1000;
+             
+            return true;
         }
     }
 
@@ -218,23 +214,22 @@ public abstract class Enemy extends Entity {
         return dir;
     }
 
-    @Override
-    public void handleEvent(KeyEvent event) {
-        switch ((int) (Math.random() * 4 + 1)) {
-            case 1:
-                dir.setTo(RIGHT);
-                break;
-            case 2:
-                dir.setTo(LEFT);
-                break;
-            case 3:
-                dir.setTo(UP);
-                break;
-            case 4:
-                dir.setTo(DOWN);
-                break;
-            default:
-                break;
+    public void handleEvent() {
+        if (input == 1) {
+
+            if (!checkMapMoveLeft()) input = (int) (Math.random() * 4 + 1);
+
+        }
+        if (input == 2) {
+            if (!checkMapMoveRight()) input = (int) (Math.random() * 4 + 1);
+        }
+
+        if (input == 3) {
+            if (!checkMapMoveUp()) input = (int) (Math.random() * 4 + 1);
+        }
+
+        if (input == 4) {
+            if (!checkMapMoveDown()) input = (int) (Math.random() * 4 + 1);
         }
     }
 
