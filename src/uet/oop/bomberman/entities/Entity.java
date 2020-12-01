@@ -22,7 +22,7 @@ public abstract class Entity {
     protected Image _img;
     protected Sprite sprite;
     protected Sprite bombSprite;
-    public Rectangle rtg=new Rectangle();
+    public Rectangle rtg = new Rectangle();
     protected int animate;
 
 
