@@ -18,12 +18,12 @@ public abstract class Enemy extends Entity {
 
     private int input=1;
     private final Coordinate dir;
-    protected double speed=0.025;
+    protected double speed=1;
     protected int life=2;
     private boolean damaged=false;
     private boolean killed = false;
     protected final int MAX_DEAD_ANIMATE_LOOP = 5;
-    
+
     private boolean throughWall=false;
 
     private int dead_animate_loop = MAX_DEAD_ANIMATE_LOOP;
@@ -129,21 +129,21 @@ public abstract class Enemy extends Entity {
                         map[(int) pos.y][(int) pos.x - 1] != 'w' &&
                         map[(int) pos.y][(int) pos.x - 1] != 't') {
                     pos.x = (double) Math.round((pos.x - speed) * 1000) / 1000;
-                     
+
                     return true;
                 }
                 return false;
             } else {
                 if (map[(int) pos.y][(int) pos.x - 1] != '#') {
                     pos.x = (double) Math.round((pos.x - speed) * 1000) / 1000;
-                     
+
                     return true;
                 }
                 return false;
             }
         } else {
             pos.x = (double) Math.round((pos.x - speed) * 1000) / 1000;
-             
+
             return true;
         }
 
@@ -157,21 +157,21 @@ public abstract class Enemy extends Entity {
                         map[(int) pos.y - 1] [(int) pos.x] != 'w' &&
                         map[(int) pos.y - 1] [(int) pos.x] != 't') {
                     pos.y = (double) Math.round((pos.y - speed) * 1000) / 1000;
-                     
+
                     return true;
                 }
                 return false;
             } else {
                 if (map[(int) pos.y - 1] [(int) pos.x] != '#') {
                     pos.y = (double) Math.round((pos.y - speed) * 1000) / 1000;
-                     
+
                     return true;
                 }
                 return false;
             }
         } else {
             pos.y = (double) Math.round((pos.y - speed) * 1000) / 1000;
-             
+
             return true;
         }
     }
@@ -185,21 +185,21 @@ public abstract class Enemy extends Entity {
                         map[(int) pos.y + 1] [(int) pos.x] != 'w' &&
                         map[(int) pos.y + 1] [(int) pos.x] != 't') {
                     pos.y = (double) Math.round((pos.y + speed) * 1000) / 1000;
-                     
+
                     return true;
                 }
                 return false;
             } else {
                 if (map[(int) pos.y + 1] [(int) pos.x] != '#') {
                     pos.y = (double) Math.round((pos.y + speed) * 1000) / 1000;
-                     
+
                     return true;
                 }
                 return false;
             }
         } else {
             pos.y = (double) Math.round((pos.y + speed) * 1000) / 1000;
-             
+
             return true;
         }
     }

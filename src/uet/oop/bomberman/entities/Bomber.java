@@ -71,7 +71,21 @@ public class Bomber extends Entity {
     public void update() {
         animate();
         if (!isKilled()) {
+            int curX,curY;
+            for (int i = 0; i < bombs.size(); i++) {
+                if (checkCollision(this, bombs.get(i))) {
+                    curX = (int) bombs.get(i).pos.x; curY = (int) bombs.get(i).pos.y;
+                    map[curY][curX] = 'B';
+                }
+            }
             move();
+            if (!bombs.isEmpty()) {
+                if (bombs.get(bombs.size() - 1).isExploded()) {
+                    curX = (int) bombs.get(bombs.size() - 1).pos.x; curY = (int) bombs.get(bombs.size() - 1).pos.y;
+                    map[curY][curX] = ' ';
+                    bombs.remove(bombs.size() - 1);
+                }
+            }
         }
     }
 
@@ -264,7 +278,7 @@ public class Bomber extends Entity {
                             // dat bom
                             Bomb bomb = placeBomb();
                             entities.add(bomb);
-                            flames.addAll( bomb.getFlames());
+                            flames.addAll(bomb.getFlames());
                             map[curY][curX] = ' ';
                         }
                     }
