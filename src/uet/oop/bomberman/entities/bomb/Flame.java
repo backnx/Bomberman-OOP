@@ -39,12 +39,14 @@ public class Flame extends Entity {
     public Flame(Coordinate pos, Image img) {
         super(pos, img);
         rtg = new Rectangle(pos.getX(),pos.getY(), 0.99, 0.99);
+        explodingImg();
     }
 
     public Flame(Coordinate pos, Image img, String position) {
         super(pos, img);
         rtg = new Rectangle(pos.getX(),pos.getY(), 0.99, 0.99);
         this.position = position;
+        explodingImg();
     }
 
 
@@ -60,7 +62,8 @@ public class Flame extends Entity {
         } else {
             // System.out.println(pos);
             switch(position) {
-                case "left": {
+                case "left":
+                case "right": {
                     // System.out.println(pos);
                     this.img = Sprite
                             .bombExplodeSprite(Sprite.explosion_horizontal, Sprite.explosion_horizontal1,
@@ -68,20 +71,7 @@ public class Flame extends Entity {
                             .getFxImage();
                     break;
                 }
-                case "down": {
-                    this.img = Sprite
-                            .bombExplodeSprite(Sprite.explosion_vertical, Sprite.explosion_vertical1,
-                                    Sprite.explosion_vertical2, explosionCountDown)
-                            .getFxImage();
-                    break;
-                }
-                case "right": {
-                    this.img = Sprite
-                            .bombExplodeSprite(Sprite.explosion_horizontal, Sprite.explosion_horizontal1,
-                                    Sprite.explosion_horizontal2, explosionCountDown)
-                            .getFxImage();
-                    break;
-                }
+                case "down":
                 case "top": {
                     this.img = Sprite
                             .bombExplodeSprite(Sprite.explosion_vertical, Sprite.explosion_vertical1,

@@ -3,8 +3,8 @@ package uet.oop.bomberman.entities;
 import uet.oop.bomberman.graphics.Sprite;
 
 public class Coordinate {
-    double x;
-    double y;
+    public double x;
+    public double y;
 
     public double getX() {
         return x;

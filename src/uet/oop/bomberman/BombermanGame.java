@@ -14,6 +14,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
+import uet.oop.bomberman.entities.Enemy.Balloon;
+import uet.oop.bomberman.entities.Enemy.Doll;
+import uet.oop.bomberman.entities.Enemy.Enemy;
+import uet.oop.bomberman.entities.Enemy.Oneal;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.entities.Item.BombsItem;
 import uet.oop.bomberman.entities.Item.FlameItem;
@@ -49,11 +53,12 @@ public class BombermanGame extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
     public static List<Entity> entities = new ArrayList<>();
-    private List<Entity> stillObjects = new ArrayList<>();// contains Grass and Walls
+    public static List<Entity> stillObjects = new ArrayList<>();// contains Grass and Walls
     public static List<Entity> destroyableObjects = new ArrayList<>(); // contains Items and Bricks
     public static List<Entity> damagedObjects = new ArrayList<>();
-    public static List<Entity> flames = new ArrayList<>();
-    public Bomber bomberman;
+    public static List<Flame> flames = new ArrayList<>();
+    public static Bomber bomberman;
+    public static int enemyCnt;
 
     public static char[][] map = new char[HEIGHT][WIDTH];
 
@@ -79,7 +84,7 @@ public class BombermanGame extends Application {
         root.getChildren().add(canvas);
 
         // Tao scene
-        Scene scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE* (HEIGHT + 1), Color.BLACK);
+        Scene scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * (HEIGHT + 1), Color.BLACK);
 
         // Them scene vao stage
         stage.setTitle("Bomberman Gameee");
@@ -109,19 +114,19 @@ public class BombermanGame extends Application {
         }
         createMap();
 
-        score = new Text(30,435,"Score: ");
+        score = new Text(30, 435, "Score: ");
         time = new Text(300, 435, "Time: ");
         score.setFill(Color.WHITE);
         score.setFont(new Font(14));
         time.setFill(Color.WHITE);
         time.setFont(new Font(14));
-        _score = new Text(90,435, String.valueOf(bomberScore));
+        _score = new Text(90, 435, String.valueOf(bomberScore));
         _score.setFill(Color.WHITE);
         _score.setFont(new Font(14));
-        _time = new Text(360,435, String.valueOf(timeLeft));
+        _time = new Text(360, 435, String.valueOf(timeLeft));
         _time.setFill(Color.WHITE);
         _time.setFont(new Font(14));
-        root.getChildren().addAll(score,time,_score,_time);
+        root.getChildren().addAll(score, time, _score, _time);
 
         bomberman = new Bomber(new Coordinate(1, 1), Sprite.player_right.getFxImage());
         entities.add(bomberman);
@@ -162,7 +167,7 @@ public class BombermanGame extends Application {
     public void createMap() {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
-                Entity object = new Grass(new Coordinate(j, i), Sprite.grass.getFxImage());
+                Entity object;
                 Coordinate pos_ = new Coordinate(j, i);
                 switch (map[i][j]) {
                     case '#': {
@@ -191,6 +196,27 @@ public class BombermanGame extends Application {
                         destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
                                 , new FlameItem(pos_, Sprite.powerup_flames.getFxImage())));
                         map[i][j] = '*';
+                        break;
+                    }
+                    case '1': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Enemy enemy = new Balloon(pos_, Sprite.balloom_left1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
+                        break;
+                    }
+                    case '2': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Entity enemy = new Oneal(pos_, Sprite.oneal_left1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
+                        break;
+                    }
+                    case '3': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Entity enemy = new Doll(pos_, Sprite.doll_right1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
                         break;
                     }
                     default: {
@@ -238,8 +264,8 @@ public class BombermanGame extends Application {
 
             // get the explosion done (remove the flames)
             flames.forEach(o -> {
-                if (o instanceof Flame) {
-                    if (((Flame) o).isDone()) {
+                if (o != null) {
+                    if (o.isDone()) {
                         flames.remove(o);
                     }
                 }
@@ -260,7 +286,7 @@ public class BombermanGame extends Application {
                 map[(int) o.getY()][(int) o.getX()] = ' ';
 
                 // check if the bomb damange any objects
-                ((Bomb) o).handleFlameCollision(entities, destroyableObjects, damagedObjects);
+                ((Bomb) o).handleFlameCollision();
                 entities.remove(o);
             }
         }
@@ -297,6 +323,10 @@ public class BombermanGame extends Application {
 
             } else {
                 br.update();
+            }
+        } else if (br instanceof Enemy) {
+            if (br.getImg() == null) {
+                entities.remove(br);
             }
         }
     }

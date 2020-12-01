@@ -23,7 +23,18 @@ public abstract class Entity {
     protected Sprite sprite;
     protected Sprite bombSprite;
     public Rectangle rtg=new Rectangle();
+    protected int animate;
 
+
+    protected final int MAX_ANIMATE = 7500;
+    protected void animate() {
+
+            if (animate < MAX_ANIMATE) {
+                animate++;
+            } else {
+                animate = 0;
+            }
+    }
     public Entity( Coordinate pos, Image img) {
         this.pos.setTo(pos);
         this.img = img;
@@ -110,11 +121,8 @@ public abstract class Entity {
             HashSet<String> maskPlayer1 = getMask(a);
             HashSet<String> maskPlayer2 = getMask(b);
             maskPlayer1.retainAll(maskPlayer2);
-            if(maskPlayer1.size() > 0){
-                return false;
-            }
+            return maskPlayer1.size() > 0;
         }
-        return true;
     }
 
     public abstract void update();

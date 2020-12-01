@@ -12,20 +12,24 @@ import uet.oop.bomberman.graphics.Sprite;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uet.oop.bomberman.BombermanGame.map;
+import static uet.oop.bomberman.BombermanGame.*;
 
 public class Bomb extends Entity {
 
     private int bombLevel = 3;
-    private List<Entity> flames = new ArrayList<>();
-    private boolean done = false;
+    private List<Flame> flames = new ArrayList<>();
     private boolean exploded = false;
     private int explosionCountDown = 15;
     private int tickingCountDown = 90;
 
-    public List<Entity> getFlames() {
+    public List<Flame> getFlames() {
         return flames;
     }
+
+    public boolean isExploded() {
+        return exploded;
+    }
+
 
     // set up flame cho phu hop
 
@@ -42,11 +46,6 @@ public class Bomb extends Entity {
         String[] dir = {"left", "down", "right", "top", "left_most", "down_most", "right_most", "top_most", "center"};
         int[] iX = {-1, 0, 1, 0};
         int[] iY = {0, 1, 0, -1};
-
-        // let not bomber cross the bomb
-        char[] mapz;
-        mapz = map[(int) getY()];
-        map[(int) getY()][(int) getX()] = 't';
 
         flames.add(new Flame(pos, null, "center"));
         for (int i = 0; i < 4; i++) {
@@ -76,22 +75,6 @@ public class Bomb extends Entity {
         return bombLevel;
     }
 
-    public boolean isDone() {
-        return done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
-    }
-
-    public boolean isExploded() {
-        return exploded;
-    }
-
-    public void setExploded(boolean exploded) {
-        this.exploded = exploded;
-    }
-
     public Bomb(Coordinate pos, Image img) {
         super(pos, img);
         rtg = new Rectangle(pos.getX(), pos.getY(), 0.99, 0.99);
@@ -112,8 +95,8 @@ public class Bomb extends Entity {
         } else {
             char[] mapz = map[(int) getY()];
             System.out.println(mapz);
-            map[(int) getY()] [(int) getX()]=' ';
-            System.out.println(map[(int) getY()]);
+            map[(int) getY()][(int) getX()] = ' ';
+            System.out.println("heloo");
             explodingImg();
         }
     }
@@ -124,7 +107,7 @@ public class Bomb extends Entity {
     }
 
     public void tickingImg() {
-        if (tickingCountDown == 0) {
+        if (tickingCountDown <= 0) {
             setExploded(true);
         } else {
             this.img = Sprite
@@ -136,7 +119,6 @@ public class Bomb extends Entity {
 
     public void explodingImg() {
         if (explosionCountDown == 0) {
-            setDone(true);
             this.img = null;
         } else {
             this.img = Sprite
@@ -147,52 +129,29 @@ public class Bomb extends Entity {
         }
     }
 
-    public void handleFlameCollision(List<Entity> entities, List<Entity> staticObjects,
-                                     List<Entity> damagedEntities) {
+    public void handleFlameCollision() {
 
         // damage bricks
-        for (Entity o : staticObjects) {
+        for (Entity o : destroyableObjects) {
             if (o instanceof Brick) {
                 flames.forEach(flame -> {
                     int oX = (int) o.getX(), fX = (int) flame.getX(), x = (int) this.getX();
                     int oY = (int) o.getY(), fY = (int) flame.getY(), y = (int) this.getY();
-                    String pos = ((Flame) flame).getPosition();
+                    String position = flame.getPosition();
 
-                    if (!pos.equals("left_most") && !pos.equals("down_most") &&
-                            !pos.equals("right_most") && !pos.equals("top_most")) {
+                    if (!position.equals("left_most") && !position.equals("down_most") &&
+                            !position.equals("right_most") && !position.equals("top_most")) {
                         if (oX == fX && x == oX && oY - fY == 1 ||
                                 oX == fX && x == oX && oY - fY == -1 ||
                                 oX - fX == -1 && oY == fY && y == oY ||
                                 oX - fX == 1 && oY == fY && y == oY) {
                             ((Brick) o).setDamaged(true);
-                            damagedEntities.add(o);
+                            damagedObjects.add(o);
                         }
                     } else {
                         if (oX == fX && oY == fY) {
                             ((Brick) o).setDamaged(true);
-                            damagedEntities.add(o);
-                        }
-                    }
-                });
-            }
-        }
-
-        // damage entities
-        for (Entity x : entities) {
-            if (x instanceof Bomber || x instanceof Bomb) {
-                flames.forEach(flame -> {
-                    if (flame.rtg.intersects(x.rtg.getLayoutBounds())) {
-                        if (x instanceof Bomber) {
-                            ((Bomber) x).setKilled(true);
-                            damagedEntities.add(x);
-                        }
-                        // chain explosion
-                        if (x instanceof Bomb) {
-                            // if (((Bomb) x).getTickingCountDown() > 10)
-                            ((Bomb) x).setTickingCountDown(0);
-                            ((Bomb) x).getFlames().forEach(o -> {
-                                ((Flame) o).setExplosionCountDown(15);
-                            });
+                            damagedObjects.add(o);
                         }
                     }
                 });
@@ -200,27 +159,31 @@ public class Bomb extends Entity {
         }
         // damage entities
         for (Entity x : entities) {
-            if (x instanceof Bomber || x instanceof Bomb) {
+            if (x instanceof Bomber) {
                 flames.forEach(flame -> {
-                    if (flame.rtg.intersects(x.rtg.getLayoutBounds())) {
-                        if (x instanceof Bomber) {
-                            ((Bomber) x).setKilled(true);
-                            damagedEntities.add(x);
-                        }
-                        // chain explosion
-                        if (x instanceof Bomb) {
-                            // if (((Bomb) x).getTickingCountDown() > 10)
-                            ((Bomb) x).setTickingCountDown(0);
-                            ((Bomb) x).getFlames().forEach(o -> {
-                                ((Flame) o).setExplosionCountDown(15);
-                            });
-                        }
+                    if (checkCollision(flame, x)) {
+                        ((Bomber) x).setKilled(true);
+                        System.out.println("hit");
+                    }
+                });
+            }
+            // chain explosion
+            if (x instanceof Bomb) {
+                flames.forEach(flame -> {
+                    if (checkCollision(flame, x)) {
+                        ((Bomb) x).setTickingCountDown(0);
+                        ((Bomb) x).getFlames().forEach(o -> {
+                            o.setExplosionCountDown(15);
+                        });
                     }
                 });
             }
         }
     }
 
+    public void setExploded(boolean exploded) {
+        this.exploded = exploded;
+    }
 }
 
 
