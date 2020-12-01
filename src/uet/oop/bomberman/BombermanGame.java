@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class BombermanGame extends Application {
 
@@ -41,8 +43,8 @@ public class BombermanGame extends Application {
     public double speed = 1.0;
     public int level;
 
-    private int bomberScore = 0;
-    private int timeLeft = 180;
+    private static int bomberScore = 0;
+    private static int timeLeft = 10;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -55,7 +57,10 @@ public class BombermanGame extends Application {
 
     public static char[][] map = new char[HEIGHT][WIDTH];
 
-    private Text score, _score, time, _time;
+    private static Text score, _score, time, _time;
+    static Timer timeCount;
+    private int delay = 1000;
+    private int period = 1000;
 
     Scanner scanner;
 
@@ -77,8 +82,17 @@ public class BombermanGame extends Application {
         Scene scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE* (HEIGHT + 1), Color.BLACK);
 
         // Them scene vao stage
+        stage.setTitle("Bomberman Gameee");
         stage.setScene(scene);
         stage.show();
+
+        Timer timeCount = new Timer();
+        timeCount.scheduleAtFixedRate(new TimerTask() {
+
+            public void run() {
+
+            }
+        }, delay, period);
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -115,6 +129,12 @@ public class BombermanGame extends Application {
         scene.setOnKeyReleased(this::handleEvent);
         scene.setOnKeyPressed(this::handleEvent);
 
+    }
+
+    private static final int settimeLeft() {
+        if (timeLeft == 1)
+            timeCount.cancel();
+        return --timeLeft;
     }
 
     public void loadMap() throws FileNotFoundException {
@@ -190,6 +210,7 @@ public class BombermanGame extends Application {
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
         updateItem();
+        _time.setText(String.valueOf(timeLeft));
     }
 
     public void render() {
