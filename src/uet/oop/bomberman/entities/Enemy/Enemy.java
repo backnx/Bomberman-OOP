@@ -17,7 +17,7 @@ public abstract class Enemy extends Entity {
     public static final Coordinate RIGHT = new Coordinate(1, 0);
 
     private int input=1;
-    private final Coordinate dir;
+    protected Coordinate dir;
     protected double speed=1;
     protected int life=2;
     private boolean damaged=false;
@@ -217,35 +217,28 @@ public abstract class Enemy extends Entity {
     public void handleEvent() {
         if (input == 1) {
 
+            dir=LEFT;
             if (!checkMapMoveLeft()) input = (int) (Math.random() * 4 + 1);
 
         }
         if (input == 2) {
+            dir=RIGHT;
             if (!checkMapMoveRight()) input = (int) (Math.random() * 4 + 1);
         }
 
         if (input == 3) {
+            dir=UP;
             if (!checkMapMoveUp()) input = (int) (Math.random() * 4 + 1);
         }
 
         if (input == 4) {
+            dir=DOWN;
             if (!checkMapMoveDown()) input = (int) (Math.random() * 4 + 1);
         }
     }
 
 
-    private void chooseSprite() {
-        if (!isKilled()) {
-            if (dir.equalTo(UP)||dir.equalTo(LEFT)) {
-                sprite = Sprite.movingSprite(Sprite.balloom_left1, Sprite.balloom_left2,Sprite.balloom_left3, animate, 20);
-            } else {
-                sprite = Sprite.movingSprite(Sprite.balloom_right1, Sprite.balloom_right2,Sprite.balloom_right3, animate, 20);
-            }
-        } else {
-            sprite = Sprite.bombExplodeSprite(Sprite.mob_dead1, Sprite.mob_dead2, Sprite.mob_dead3, animate);
-        }
-
-        img = sprite.getFxImage();
+    public void chooseSprite() {
     }
 
 
