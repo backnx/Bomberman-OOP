@@ -5,6 +5,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Rectangle;
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
+import uet.oop.bomberman.entities.Enemy.Enemy;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.graphics.Sprite;
@@ -138,7 +139,6 @@ public class Bomb extends Entity {
                     int oX = (int) o.getX(), fX = (int) flame.getX(), x = (int) this.getX();
                     int oY = (int) o.getY(), fY = (int) flame.getY(), y = (int) this.getY();
                     String position = flame.getPosition();
-
                     if (!position.equals("left_most") && !position.equals("down_most") &&
                             !position.equals("right_most") && !position.equals("top_most")) {
                         if (oX == fX && x == oX && oY - fY == 1 ||
@@ -175,6 +175,15 @@ public class Bomb extends Entity {
                         ((Bomb) x).getFlames().forEach(o -> {
                             o.setExplosionCountDown(15);
                         });
+                    }
+                });
+            }
+            if (x instanceof Enemy) {
+                flames.forEach(flame -> {
+                    if (checkCollision(flame, x)) {
+                        ((Enemy) x).setKilled(true);
+                        bomberScore += 100;
+                        entities.remove((Enemy) x);
                     }
                 });
             }

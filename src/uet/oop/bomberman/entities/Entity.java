@@ -105,24 +105,23 @@ public abstract class Entity {
     }
 
     public boolean checkCollision (Entity a, Entity b) {
-        double ax1 = a.getPos().x;
-        double ay1 = a.getPos().y;
-        double ax2 = ax1 + a.getImg().getWidth();
-        double ay2 = ay1 + a.getImg().getHeight();
-        double bx1 = b.getPos().x;
+        /*double ax1 =  a.getPos().x;
+        double ay1 =  a.getPos().y;
+        double ax2 =  (ax1 + a.getImg().getWidth());
+        double ay2 =  (ay1 + a.getImg().getHeight());
+        double bx1 =  b.getPos().x;
         double by1 = b.getPos().y;
-        double bx2 = bx1 + b.getImg().getWidth();
-        double by2 = by1 + b.getImg().getHeight();
+        double bx2 = (bx1 + b.getImg().getWidth());
+        double by2 = (by1 + b.getImg().getHeight());
 
         if (by2 < ay1 || ay2 < by1 || bx2 < ax1 || ax2 < bx1) {
             return false;
-        }
-        else {
+        }*/
+
             HashSet<String> maskPlayer1 = getMask(a);
             HashSet<String> maskPlayer2 = getMask(b);
             maskPlayer1.retainAll(maskPlayer2);
             return maskPlayer1.size() > 0;
-        }
     }
 
     public abstract void update();

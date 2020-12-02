@@ -4,8 +4,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import uet.oop.bomberman.BombermanGame;
+import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
 import uet.oop.bomberman.entities.Entity;
+import uet.oop.bomberman.entities.bomb.Bomb;
+import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.graphics.Sprite;
 
 import static uet.oop.bomberman.BombermanGame.*;
@@ -272,5 +275,19 @@ public abstract class Enemy extends Entity {
 
     public void setDamaged(boolean damaged) {
         this.damaged = damaged;
+    }
+
+    public void handleEnemyCollision() {
+        // damage entities
+        for (Entity x : entities) {
+            if (x instanceof Bomber) {
+                entities.forEach(entity -> {
+                    if (checkCollision(entity, x)) {
+                        ((Bomber) x).setKilled(true);
+                        System.out.println("an l roi");
+                    }
+                });
+            }
+        }
     }
 }

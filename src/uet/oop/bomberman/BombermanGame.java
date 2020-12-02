@@ -14,10 +14,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import uet.oop.bomberman.entities.Bomber;
 import uet.oop.bomberman.entities.Coordinate;
-import uet.oop.bomberman.entities.Enemy.Balloon;
-import uet.oop.bomberman.entities.Enemy.Doll;
-import uet.oop.bomberman.entities.Enemy.Enemy;
-import uet.oop.bomberman.entities.Enemy.Oneal;
+import uet.oop.bomberman.entities.Enemy.*;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.entities.Item.BombsItem;
 import uet.oop.bomberman.entities.Item.FlameItem;
@@ -47,8 +44,8 @@ public class BombermanGame extends Application {
     public double speed = 1.0;
     public int level;
 
-    private static int bomberScore = 0;
-    private static int timeLeft = 10;
+    public static int bomberScore = 0;
+    public static int timeLeft = 200;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -89,13 +86,14 @@ public class BombermanGame extends Application {
         // Them scene vao stage
         stage.setTitle("Bomberman Gameee");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
 
         Timer timeCount = new Timer();
         timeCount.scheduleAtFixedRate(new TimerTask() {
 
             public void run() {
-
+                timeLeft--;
             }
         }, delay, period);
 
@@ -134,12 +132,6 @@ public class BombermanGame extends Application {
         scene.setOnKeyReleased(this::handleEvent);
         scene.setOnKeyPressed(this::handleEvent);
 
-    }
-
-    private static final int settimeLeft() {
-        if (timeLeft == 1)
-            timeCount.cancel();
-        return --timeLeft;
     }
 
     public void loadMap() throws FileNotFoundException {
@@ -203,6 +195,7 @@ public class BombermanGame extends Application {
                         Enemy enemy = new Balloon(pos_, Sprite.balloom_left1.getFxImage());
                         entities.add(enemy);
                         ++enemyCnt;
+                        map[i][j] = ' ';
                         break;
                     }
                     case '2': {
@@ -210,6 +203,7 @@ public class BombermanGame extends Application {
                         Entity enemy = new Oneal(pos_, Sprite.oneal_left1.getFxImage());
                         entities.add(enemy);
                         ++enemyCnt;
+                        map[i][j] = ' ';
                         break;
                     }
                     case '3': {
@@ -217,8 +211,18 @@ public class BombermanGame extends Application {
                         Entity enemy = new Doll(pos_, Sprite.doll_right1.getFxImage());
                         entities.add(enemy);
                         ++enemyCnt;
+                        map[i][j] = ' ';
                         break;
                     }
+                    case '4': {
+                        stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
+                        Entity enemy = new Kondoria(pos_, Sprite.kondoria_right1.getFxImage());
+                        entities.add(enemy);
+                        ++enemyCnt;
+                        map[i][j] = ' ';
+                        break;
+                    }
+
                     default: {
                         object = new Grass(pos_, Sprite.grass.getFxImage());
                         stillObjects.add(object);
@@ -236,7 +240,11 @@ public class BombermanGame extends Application {
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
         updateItem();
+        if (timeLeft < 1) {
+            timeLeft = 0;
+        }
         _time.setText(String.valueOf(timeLeft));
+        _score.setText(String.valueOf(bomberScore));
     }
 
     public void render() {
