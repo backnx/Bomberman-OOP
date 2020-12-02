@@ -10,6 +10,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import uet.oop.bomberman.entities.Bomber;
@@ -42,10 +43,12 @@ public class BombermanGame extends Application {
     public static int HEIGHT = 13;
 
     public double speed = 1.0;
-    public int level;
+    public int level = 1;
 
     public static int bomberScore = 0;
-    public static int timeLeft = 200;
+    public static int timeLeft = 180;
+    public static int liveLeft = 3;
+    public boolean nextLevel = false;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -56,11 +59,11 @@ public class BombermanGame extends Application {
     public static List<Flame> flames = new ArrayList<>();
     public static Bomber bomberman;
     public static int enemyCnt;
-
+    private Scene scene;
+    private Stage finalStage;
     public static char[][] map = new char[HEIGHT][WIDTH];
 
-    private static Text score, _score, time, _time;
-    static Timer timeCount;
+    private static Text score, _score, time, _time, live, _live, noti;
     private int delay = 1000;
     private int period = 1000;
 
@@ -81,7 +84,7 @@ public class BombermanGame extends Application {
         root.getChildren().add(canvas);
 
         // Tao scene
-        Scene scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * (HEIGHT + 1), Color.BLACK);
+        scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * (HEIGHT + 1), Color.BLACK);
 
         // Them scene vao stage
         stage.setTitle("Bomberman Gameee");
@@ -102,6 +105,11 @@ public class BombermanGame extends Application {
             public void handle(long l) {
                 render();
                 update();
+                if (timeLeft == 0 || liveLeft == 0) {
+                    String string = "YOU LOSE :<";
+                    endGame(string);
+                    stage.setScene(scene);
+                }
             }
         };
         timer.start();
@@ -114,28 +122,33 @@ public class BombermanGame extends Application {
 
         score = new Text(30, 435, "Score: ");
         time = new Text(300, 435, "Time: ");
+        live = new Text(570, 435, "Live: ");
         score.setFill(Color.WHITE);
         score.setFont(new Font(14));
         time.setFill(Color.WHITE);
         time.setFont(new Font(14));
+        live.setFill(Color.WHITE);
+        live.setFont(new Font(14));
         _score = new Text(90, 435, String.valueOf(bomberScore));
         _score.setFill(Color.WHITE);
         _score.setFont(new Font(14));
         _time = new Text(360, 435, String.valueOf(timeLeft));
         _time.setFill(Color.WHITE);
         _time.setFont(new Font(14));
-        root.getChildren().addAll(score, time, _score, _time);
+        _live = new Text(630, 435, String.valueOf(liveLeft));
+        _live.setFill(Color.WHITE);
+        _live.setFont(new Font(14));
+        root.getChildren().addAll(score, time, _score, _time, live, _live);
 
         bomberman = new Bomber(new Coordinate(1, 1), Sprite.player_right.getFxImage());
         entities.add(bomberman);
 
         scene.setOnKeyReleased(this::handleEvent);
         scene.setOnKeyPressed(this::handleEvent);
-
     }
 
     public void loadMap() throws FileNotFoundException {
-        scanner = new Scanner(new File("res\\levels\\Level1.txt"));
+        scanner = new Scanner(new File("res\\levels\\Level" + level + ".txt"));
         int res;
         for (int i = 0; i < 3; i++) {
             res = scanner.nextInt();
@@ -234,17 +247,20 @@ public class BombermanGame extends Application {
         }
     }
 
-
     public void update() {
         updateDamagedObjects(); // enemies, bricks and flames
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
         updateItem();
-        if (timeLeft < 1) {
+        if (bomberman.isKilled()) {
+            liveLeft--;
+        }
+        if (timeLeft < 1 || liveLeft == 0) {
             timeLeft = 0;
         }
         _time.setText(String.valueOf(timeLeft));
         _score.setText(String.valueOf(bomberScore));
+        _live.setText(String.valueOf(liveLeft));
     }
 
     public void render() {
@@ -362,4 +378,13 @@ public class BombermanGame extends Application {
         }
     }
 
+    private void endGame(String string) {
+        Group root = new Group();
+        Text noti = new Text(220,240, string);
+
+        noti.setFill(Color.GHOSTWHITE);
+        noti.setFont(Font.font("Arial",FontWeight.BOLD,90));
+        root.getChildren().add(noti);
+        scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * (HEIGHT + 1), Color.BLACK);
+    }
 }
