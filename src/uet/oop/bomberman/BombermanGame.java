@@ -30,12 +30,7 @@ import uet.oop.bomberman.graphics.Sprite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class BombermanGame extends Application {
 
@@ -50,6 +45,7 @@ public class BombermanGame extends Application {
     public static int liveLeft = 3;
     public static boolean nextLevel = true;
 
+    private boolean liveSub = false;
     private GraphicsContext gc;
     private Canvas canvas;
     public static List<Entity> entities = new ArrayList<>();
@@ -73,7 +69,7 @@ public class BombermanGame extends Application {
     }
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws InterruptedException {
         // Tao Canvas
         canvas = new Canvas(Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * HEIGHT);
         gc = canvas.getGraphicsContext2D();
@@ -111,8 +107,12 @@ public class BombermanGame extends Application {
                     createMap();
                     nextLevel = false;
                 }
-                render();
                 update();
+                try {
+                    render();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 if (timeLeft == 0 || liveLeft == 0) {
                     String string = "YOU LOSE :<";
                     endGame(string);
@@ -256,16 +256,9 @@ public class BombermanGame extends Application {
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
         updateItem();
-        if (bomberman.isKilled()) {
+        if (bomberman.isKilled() && !liveSub) {
             liveLeft--;
-            for (Entity x : entities) {
-                if (x instanceof Bomber) {
-                    entities.remove(x);
-                }
-            }
-            bomberman = new Bomber(new Coordinate(1, 1), Sprite.player_right.getFxImage());
-            bomberman.setKilled(false);
-            entities.add(bomberman);
+            liveSub = true;
         }
         if (timeLeft < 1) {
             timeLeft = 0;
@@ -275,13 +268,30 @@ public class BombermanGame extends Application {
         _live.setText(String.valueOf(liveLeft));
     }
 
-    public void render() {
+    public void render() throws InterruptedException {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        stillObjects.forEach(g -> g.render(gc));
-        destroyableObjects.forEach(g -> g.render(gc));
-        entities.forEach(g -> g.render(gc));
-        damagedObjects.forEach(g -> g.render(gc));
-        flames.forEach(g -> g.render(gc));
+        stillObjects.forEach(g -> {
+            g.render(gc);
+        });
+        destroyableObjects.forEach(g -> {
+            g.render(gc);
+        });
+        entities.forEach(g -> {
+            g.render(gc);
+        });
+        damagedObjects.forEach(g -> {
+            g.render(gc);
+        });
+        flames.forEach(g -> {
+            g.render(gc);
+        });
+        if (bomberman.deadRenderDone) {
+            bomberman.setKilled(false);
+            liveSub = false;
+            bomberman.dead_animate_loop = bomberman.MAX_DEAD_ANIMATE_LOOP;
+            bomberman.deadRenderDone = false;
+        }
+
     }
 
     public void handleEvent(Event event) {
@@ -307,7 +317,6 @@ public class BombermanGame extends Application {
                 }
             });
         } catch (ConcurrentModificationException e) {
-            // System.out.println("were no errors to happen");
         }
 
 
@@ -392,10 +401,10 @@ public class BombermanGame extends Application {
 
     private void endGame(String string) {
         Group root = new Group();
-        Text noti = new Text(220,240, string);
+        Text noti = new Text(220, 240, string);
 
         noti.setFill(Color.GHOSTWHITE);
-        noti.setFont(Font.font("Arial",FontWeight.BOLD,90));
+        noti.setFont(Font.font("Arial", FontWeight.BOLD, 90));
         root.getChildren().add(noti);
         scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * (HEIGHT + 1), Color.BLACK);
     }

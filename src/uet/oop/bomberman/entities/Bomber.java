@@ -19,20 +19,18 @@ public class Bomber extends Entity {
     public static final Coordinate LEFT = new Coordinate(-1, 0);
     public static final Coordinate RIGHT = new Coordinate(1, 0);
 
-    private final Coordinate dir;
+    private Coordinate dir;
     private boolean isMoving = false;
     private double speed;
     private boolean killed = false;
     private int bombRange = 1;
     public int bombLimit = 1;
-    protected final int MAX_DEAD_ANIMATE_LOOP = 5;
+    public final int MAX_DEAD_ANIMATE_LOOP = 5;
 
-    private int posX_bomb = 32;
-    private int posY_bomb = 14;
+    public boolean deadRenderDone =false;
 
     private List<Bomb> bombs = new ArrayList<>();
-    private int maxBombs = 2;
-    private int dead_animate_loop = MAX_DEAD_ANIMATE_LOOP;
+    public int dead_animate_loop = MAX_DEAD_ANIMATE_LOOP;
 
     /**
      * Hoat hinh
@@ -50,6 +48,7 @@ public class Bomber extends Entity {
                 dead_animate_loop--;
             }
             if (dead_animate_loop == 0) {
+                deadRenderDone =true;
                 return;
             }
             if (animate < 15) {
@@ -66,6 +65,7 @@ public class Bomber extends Entity {
         dir = new Coordinate();
         speed = 0.05;
     }
+
 
     public List<Bomb> getBombs() {
         return bombs;
@@ -336,7 +336,7 @@ public class Bomber extends Entity {
 
 
     @Override
-    public void render(GraphicsContext gc) {
+    public void render(GraphicsContext gc) throws InterruptedException {
         chooseSprite();
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
         //bombSprite = Sprite.movingSprite(Sprite.bomb, Sprite.bomb_1, Sprite.bomb_2, animate, 20);
