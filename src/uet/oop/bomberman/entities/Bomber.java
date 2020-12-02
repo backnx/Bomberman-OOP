@@ -92,6 +92,13 @@ public class Bomber extends Entity {
             }
             move();
         }
+
+        // Khi het Enemies
+        if (entities.size() <= 1) {
+            nextLevel = true;
+            level++;
+            timeLeft = 180;
+        }
     }
 
     public void checkMapMoveRight() {

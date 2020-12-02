@@ -43,12 +43,12 @@ public class BombermanGame extends Application {
     public static int HEIGHT = 13;
 
     public double speed = 1.0;
-    public int level = 1;
+    public static int level = 1;
 
     public static int bomberScore = 0;
     public static int timeLeft = 180;
     public static int liveLeft = 3;
-    public boolean nextLevel = false;
+    public static boolean nextLevel = true;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -60,10 +60,9 @@ public class BombermanGame extends Application {
     public static Bomber bomberman;
     public static int enemyCnt;
     private Scene scene;
-    private Stage finalStage;
     public static char[][] map = new char[HEIGHT][WIDTH];
 
-    private static Text score, _score, time, _time, live, _live, noti;
+    private static Text score, _score, time, _time, live, _live;
     private int delay = 1000;
     private int period = 1000;
 
@@ -103,6 +102,15 @@ public class BombermanGame extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
+                if (nextLevel == true) {
+                    try {
+                        loadMap();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    createMap();
+                    nextLevel = false;
+                }
                 render();
                 update();
                 if (timeLeft == 0 || liveLeft == 0) {
@@ -113,12 +121,6 @@ public class BombermanGame extends Application {
             }
         };
         timer.start();
-        try {
-            loadMap();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        createMap();
 
         score = new Text(30, 435, "Score: ");
         time = new Text(300, 435, "Time: ");
@@ -170,6 +172,8 @@ public class BombermanGame extends Application {
     }
 
     public void createMap() {
+        stillObjects.clear();
+        destroyableObjects.clear();
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 Entity object;
@@ -254,8 +258,16 @@ public class BombermanGame extends Application {
         updateItem();
         if (bomberman.isKilled()) {
             liveLeft--;
+            for (Entity x : entities) {
+                if (x instanceof Bomber) {
+                    entities.remove(x);
+                }
+            }
+            bomberman = new Bomber(new Coordinate(1, 1), Sprite.player_right.getFxImage());
+            bomberman.setKilled(false);
+            entities.add(bomberman);
         }
-        if (timeLeft < 1 || liveLeft == 0) {
+        if (timeLeft < 1) {
             timeLeft = 0;
         }
         _time.setText(String.valueOf(timeLeft));
