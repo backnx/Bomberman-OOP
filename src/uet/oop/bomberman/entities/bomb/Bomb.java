@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static uet.oop.bomberman.BombermanGame.*;
+import static uet.oop.bomberman.Sound.sound.*;
+import static uet.oop.bomberman.Sound.sound.BomberDie;
 
 public class Bomb extends Entity {
 
@@ -162,6 +164,8 @@ public class Bomb extends Entity {
             if (x instanceof Bomber) {
                 flames.forEach(flame -> {
                     if (checkCollision(flame, x)) {
+                        BomberDie.play();
+                        BomberDie.seek(BomberDie.getStartTime());
                         ((Bomber) x).setKilled(true);
                         System.out.println("hit");
                     }
@@ -181,6 +185,8 @@ public class Bomb extends Entity {
             if (x instanceof Enemy) {
                 flames.forEach(flame -> {
                     if (checkCollision(flame, x)) {
+                        enemyDie.play();
+                        enemyDie.seek(enemyDie.getStartTime());
                         ((Enemy) x).setKilled(true);
                         bomberScore += 100;
                         entities.remove((Enemy) x);

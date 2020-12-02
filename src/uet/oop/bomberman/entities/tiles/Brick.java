@@ -11,6 +11,7 @@ import uet.oop.bomberman.graphics.Sprite;
 public class Brick extends Entity {
 
     private Item item = null;
+    private Portal portal = null;
     private boolean damaged = false;
     private boolean done = false;
     private int deathCountDown = 90;
@@ -23,6 +24,11 @@ public class Brick extends Entity {
     public Brick(Coordinate pos, Image img, Item item_) {
         super(pos, img);
         item = item_;
+    }
+
+    public Brick(Coordinate pos, Image img, Portal portal_) {
+        super(pos, img);
+        portal = portal_;
     }
 
     public boolean isDamaged() {
@@ -67,6 +73,10 @@ public class Brick extends Entity {
 
     public Item getItem() {
         return item;
+    }
+
+    public Portal getPortal() {
+        return portal;
     }
 
     public void setItem(Item item) {

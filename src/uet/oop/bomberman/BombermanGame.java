@@ -25,17 +25,15 @@ import uet.oop.bomberman.entities.bomb.Bomb;
 import uet.oop.bomberman.entities.bomb.Flame;
 import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.entities.tiles.Grass;
+import uet.oop.bomberman.entities.tiles.Portal;
 import uet.oop.bomberman.entities.tiles.Wall;
 import uet.oop.bomberman.graphics.Sprite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+
+import static uet.oop.bomberman.Sound.sound.*;
 
 public class BombermanGame extends Application {
 
@@ -43,13 +41,15 @@ public class BombermanGame extends Application {
     public static int HEIGHT = 13;
 
     public double speed = 1.0;
-    public int level = 1;
+    public static int level = 1;
 
     public static int bomberScore = 0;
     public static int timeLeft = 180;
     public static int liveLeft = 3;
-    public boolean nextLevel = false;
+    public static boolean nextLevel = true;
+    public static boolean coliPortal = true;
 
+    private boolean liveSub = false;
     private GraphicsContext gc;
     private Canvas canvas;
     public static List<Entity> entities = new ArrayList<>();
@@ -60,10 +60,9 @@ public class BombermanGame extends Application {
     public static Bomber bomberman;
     public static int enemyCnt;
     private Scene scene;
-    private Stage finalStage;
     public static char[][] map = new char[HEIGHT][WIDTH];
 
-    private static Text score, _score, time, _time, live, _live, noti;
+    private static Text score, _score, time, _time, live, _live;
     private int delay = 1000;
     private int period = 1000;
 
@@ -74,7 +73,7 @@ public class BombermanGame extends Application {
     }
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws InterruptedException {
         // Tao Canvas
         canvas = new Canvas(Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * HEIGHT);
         gc = canvas.getGraphicsContext2D();
@@ -92,6 +91,9 @@ public class BombermanGame extends Application {
         stage.setResizable(false);
         stage.show();
 
+        soundtrack.play();
+        soundtrack.seek(soundtrack.getStartTime());
+
         Timer timeCount = new Timer();
         timeCount.scheduleAtFixedRate(new TimerTask() {
 
@@ -103,8 +105,25 @@ public class BombermanGame extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                render();
+                if (nextLevel && coliPortal) {
+                    levelUp.play();
+                    levelUp.seek(levelUp.getStartTime());
+                    try {
+                        loadMap();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    createMap();
+                    bomberman.setPos(new Coordinate(1,1));
+                    nextLevel = false;
+                    coliPortal = false;
+                }
                 update();
+                try {
+                    render();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 if (timeLeft == 0 || liveLeft == 0) {
                     String string = "YOU LOSE :<";
                     endGame(string);
@@ -113,12 +132,6 @@ public class BombermanGame extends Application {
             }
         };
         timer.start();
-        try {
-            loadMap();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        createMap();
 
         score = new Text(30, 435, "Score: ");
         time = new Text(300, 435, "Time: ");
@@ -170,6 +183,8 @@ public class BombermanGame extends Application {
     }
 
     public void createMap() {
+        stillObjects.clear();
+        destroyableObjects.clear();
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
                 Entity object;
@@ -200,6 +215,12 @@ public class BombermanGame extends Application {
                     case 'f': {
                         destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
                                 , new FlameItem(pos_, Sprite.powerup_flames.getFxImage())));
+                        map[i][j] = '*';
+                        break;
+                    }
+                    case 'x': {
+                        destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
+                                , new Portal(pos_, Sprite.portal.getFxImage())));
                         map[i][j] = '*';
                         break;
                     }
@@ -248,14 +269,21 @@ public class BombermanGame extends Application {
     }
 
     public void update() {
+        for (Entity e : destroyableObjects) {
+            if (e instanceof Portal) {
+                if (bomberman.checkCollision((Portal) e, bomberman))
+                    coliPortal = true;
+            }
+        }
         updateDamagedObjects(); // enemies, bricks and flames
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
         updateItem();
-        if (bomberman.isKilled()) {
+        if (bomberman.isKilled() && !liveSub) {
             liveLeft--;
+            liveSub = true;
         }
-        if (timeLeft < 1 || liveLeft == 0) {
+        if (timeLeft < 1) {
             timeLeft = 0;
         }
         _time.setText(String.valueOf(timeLeft));
@@ -263,13 +291,51 @@ public class BombermanGame extends Application {
         _live.setText(String.valueOf(liveLeft));
     }
 
-    public void render() {
+    public void render() throws InterruptedException {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        stillObjects.forEach(g -> g.render(gc));
-        destroyableObjects.forEach(g -> g.render(gc));
-        entities.forEach(g -> g.render(gc));
-        damagedObjects.forEach(g -> g.render(gc));
-        flames.forEach(g -> g.render(gc));
+        stillObjects.forEach(g -> {
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        destroyableObjects.forEach(g -> {
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        entities.forEach(g -> {
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        damagedObjects.forEach(g -> {
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        flames.forEach(g -> {
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        if (bomberman.deadRenderDone) {
+            bomberman.setKilled(false);
+            liveSub = false;
+            bomberman.dead_animate_loop = bomberman.MAX_DEAD_ANIMATE_LOOP;
+            bomberman.setPos(new Coordinate(1,1));
+            bomberman.deadRenderDone = false;
+        }
+
     }
 
     public void handleEvent(Event event) {
@@ -295,9 +361,16 @@ public class BombermanGame extends Application {
                 }
             });
         } catch (ConcurrentModificationException e) {
-            // System.out.println("were no errors to happen");
         }
-
+        entities.forEach(o->{
+            if (o instanceof Enemy){
+                if (bomberman.checkCollision(bomberman,o)) {
+                    BomberDie.play();
+                    BomberDie.seek(BomberDie.getStartTime());
+                    bomberman.setKilled(true);
+                }
+            }
+        });
 
     }
 
@@ -326,7 +399,7 @@ public class BombermanGame extends Application {
                 damagedObjects.remove(br);
                 destroyableObjects.remove(br);
                 Entity entity = new Grass(br.getPos(), Sprite.grass.getFxImage());
-                if (brick.getItem() != null) {
+                if (brick.getItem() != null || brick.getPortal() != null) {
 
                     if (brick.getItem() instanceof BombsItem) {
                         entity = new BombsItem(br.getPos(), Sprite.powerup_bombs.getFxImage());
@@ -336,6 +409,9 @@ public class BombermanGame extends Application {
                     }
                     if (brick.getItem() instanceof FlameItem) {
                         entity = new FlameItem(br.getPos(), Sprite.powerup_flames.getFxImage());
+                    }
+                    if (brick.getPortal() instanceof Portal) {
+                        entity = new Portal(br.getPos(), Sprite.portal.getFxImage());
                     }
                     destroyableObjects.add(entity);
                 } else {
@@ -361,6 +437,8 @@ public class BombermanGame extends Application {
             Entity o = destroyableObjects.get(i);
             if (o instanceof Item) {
                 if (((Item) o).collision(bomberman)) {
+                    eatItem.play();
+                    eatItem.seek(eatItem.getStartTime());
                     if (o instanceof SpeedItem) {
                         bomberman.setSpeed(bomberman.getSpeed() + 0.02);
                     } else if (o instanceof FlameItem) {
@@ -380,10 +458,10 @@ public class BombermanGame extends Application {
 
     private void endGame(String string) {
         Group root = new Group();
-        Text noti = new Text(220,240, string);
+        Text noti = new Text(220, 240, string);
 
         noti.setFill(Color.GHOSTWHITE);
-        noti.setFont(Font.font("Arial",FontWeight.BOLD,90));
+        noti.setFont(Font.font("Arial", FontWeight.BOLD, 90));
         root.getChildren().add(noti);
         scene = new Scene(root, Sprite.SCALED_SIZE * WIDTH, Sprite.SCALED_SIZE * (HEIGHT + 1), Color.BLACK);
     }
