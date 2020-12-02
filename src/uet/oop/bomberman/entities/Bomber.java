@@ -336,7 +336,7 @@ public class Bomber extends Entity {
 
 
     @Override
-    public void render(GraphicsContext gc) throws InterruptedException {
+    public void render(GraphicsContext gc) {
         chooseSprite();
         gc.drawImage(img, pos.x * Sprite.SCALED_SIZE, pos.y * Sprite.SCALED_SIZE);
         //bombSprite = Sprite.movingSprite(Sprite.bomb, Sprite.bomb_1, Sprite.bomb_2, animate, 20);

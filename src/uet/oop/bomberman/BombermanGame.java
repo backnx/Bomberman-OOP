@@ -318,7 +318,11 @@ public class BombermanGame extends Application {
             });
         } catch (ConcurrentModificationException e) {
         }
-
+        entities.forEach(o->{
+            if (o instanceof Enemy){
+                if (bomberman.checkCollision(bomberman,o)) bomberman.setKilled(true);
+            }
+        });
 
     }
 
