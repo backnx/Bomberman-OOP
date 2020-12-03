@@ -77,7 +77,7 @@ public abstract class Entity {
         this.img = img;
     }
 
-    public void render(GraphicsContext gc) {
+    public void render(GraphicsContext gc) throws InterruptedException {
 //        SnapshotParameters params = new SnapshotParameters();
 //        params.setFill(Color.TRANSPARENT);
 //

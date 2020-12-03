@@ -6,6 +6,8 @@ import uet.oop.bomberman.entities.Coordinate;
 import uet.oop.bomberman.entities.Entity;
 import uet.oop.bomberman.graphics.Sprite;
 
+import static uet.oop.bomberman.Sound.sound.bomExpl;
+
 public class Flame extends Entity {
 
     private int explosionCountDown = 120;
@@ -60,6 +62,8 @@ public class Flame extends Entity {
                 setDone(true);
             }
         } else {
+            bomExpl.play();
+            bomExpl.seek(bomExpl.getStartTime());
             // System.out.println(pos);
             switch(position) {
                 case "left":

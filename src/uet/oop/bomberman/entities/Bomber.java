@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static uet.oop.bomberman.BombermanGame.*;
+import static uet.oop.bomberman.Sound.sound.*;
 
 public class Bomber extends Entity {
     public static final Coordinate UP = new Coordinate(0, -1);
@@ -94,7 +95,7 @@ public class Bomber extends Entity {
         }
 
         // Khi het Enemies
-        if (entities.size() <= 1) {
+        if (entities.size() <= 1 && coliPortal) {
             nextLevel = true;
             level++;
             timeLeft = 180;
@@ -268,22 +269,32 @@ public class Bomber extends Entity {
         } else if (event.getEventType().equals(KeyEvent.KEY_PRESSED)) {
             switch (event.getCode()) {
                 case RIGHT:
+                    moving.play();
+                    moving.seek(moving.getStartTime());
                     dir.setTo(RIGHT);
                     isMoving = true;
                     break;
                 case LEFT:
+                    moving.play();
+                    moving.seek(moving.getStartTime());
                     dir.setTo(LEFT);
                     isMoving = true;
                     break;
                 case UP:
+                    moving.play();
+                    moving.seek(moving.getStartTime());
                     dir.setTo(UP);
                     isMoving = true;
                     break;
                 case DOWN:
+                    moving.play();
+                    moving.seek(moving.getStartTime());
                     dir.setTo(DOWN);
                     isMoving = true;
                     break;
                 case SPACE:
+                    setBomb.play();
+                    setBomb.seek(setBomb.getStartTime());
                     int curX = (int) Math.round(getX()), curY = (int) Math.round(getY());
                     if (map[curY][curX] != 't') {
                         if (bombs.size() < bombLimit) {
@@ -375,4 +386,5 @@ public class Bomber extends Entity {
     public void setBombLimit(int bombLimit) {
         this.bombLimit = bombLimit;
     }
+
 }

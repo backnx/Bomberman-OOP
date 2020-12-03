@@ -25,12 +25,14 @@ import uet.oop.bomberman.entities.bomb.Bomb;
 import uet.oop.bomberman.entities.bomb.Flame;
 import uet.oop.bomberman.entities.tiles.Brick;
 import uet.oop.bomberman.entities.tiles.Grass;
+import uet.oop.bomberman.entities.tiles.Portal;
 import uet.oop.bomberman.entities.tiles.Wall;
 import uet.oop.bomberman.graphics.Sprite;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import static uet.oop.bomberman.Sound.sound.*;
 
 public class BombermanGame extends Application {
 
@@ -44,7 +46,7 @@ public class BombermanGame extends Application {
     public static int timeLeft = 180;
     public static int liveLeft = 3;
     public static boolean nextLevel = true;
-
+    public static boolean coliPortal = true;
     private boolean liveSub = false;
     private GraphicsContext gc;
     private Canvas canvas;
@@ -87,6 +89,9 @@ public class BombermanGame extends Application {
         stage.setResizable(false);
         stage.show();
 
+        soundtrack.play();
+        soundtrack.seek(soundtrack.getStartTime());
+
         Timer timeCount = new Timer();
         timeCount.scheduleAtFixedRate(new TimerTask() {
 
@@ -98,14 +103,18 @@ public class BombermanGame extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                if (nextLevel == true) {
+                if (nextLevel && coliPortal) {
+                    levelUp.play();
+                    levelUp.seek(levelUp.getStartTime());
                     try {
                         loadMap();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
                     createMap();
+                    bomberman.setPos(new Coordinate(1,1));
                     nextLevel = false;
+                    coliPortal = false;
                 }
                 update();
                 try {
@@ -207,6 +216,12 @@ public class BombermanGame extends Application {
                         map[i][j] = '*';
                         break;
                     }
+                    case 'x': {
+                        destroyableObjects.add(new Brick(pos_, Sprite.brick.getFxImage()
+                                , new Portal(pos_, Sprite.portal.getFxImage())));
+                        map[i][j] = '*';
+                        break;
+                    }
                     case '1': {
                         stillObjects.add(new Grass(pos_, Sprite.grass.getFxImage()));
                         Enemy enemy = new Balloon(pos_, Sprite.balloom_left1.getFxImage());
@@ -252,6 +267,12 @@ public class BombermanGame extends Application {
     }
 
     public void update() {
+        for (Entity e : destroyableObjects) {
+            if (e instanceof Portal) {
+                if (bomberman.checkCollision((Portal) e, bomberman))
+                    coliPortal = true;
+            }
+        }
         updateDamagedObjects(); // enemies, bricks and flames
         entities.forEach(Entity::update);
         flames.forEach(Entity::update);
@@ -271,24 +292,45 @@ public class BombermanGame extends Application {
     public void render() throws InterruptedException {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         stillObjects.forEach(g -> {
-            g.render(gc);
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
         destroyableObjects.forEach(g -> {
-            g.render(gc);
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
         entities.forEach(g -> {
-            g.render(gc);
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
         damagedObjects.forEach(g -> {
-            g.render(gc);
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
         flames.forEach(g -> {
-            g.render(gc);
+            try {
+                g.render(gc);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
         if (bomberman.deadRenderDone) {
             bomberman.setKilled(false);
             liveSub = false;
             bomberman.dead_animate_loop = bomberman.MAX_DEAD_ANIMATE_LOOP;
+            bomberman.setPos(new Coordinate(1,1));
             bomberman.deadRenderDone = false;
         }
 
@@ -320,7 +362,11 @@ public class BombermanGame extends Application {
         }
         entities.forEach(o->{
             if (o instanceof Enemy){
-                if (bomberman.checkCollision(bomberman,o)) bomberman.setKilled(true);
+                if (bomberman.checkCollision(bomberman,o)) {
+                    BomberDie.play();
+                    BomberDie.seek(BomberDie.getStartTime());
+                    bomberman.setKilled(true);
+                }
             }
         });
 
@@ -351,7 +397,7 @@ public class BombermanGame extends Application {
                 damagedObjects.remove(br);
                 destroyableObjects.remove(br);
                 Entity entity = new Grass(br.getPos(), Sprite.grass.getFxImage());
-                if (brick.getItem() != null) {
+                if (brick.getItem() != null || brick.getPortal() != null) {
 
                     if (brick.getItem() instanceof BombsItem) {
                         entity = new BombsItem(br.getPos(), Sprite.powerup_bombs.getFxImage());
@@ -361,6 +407,9 @@ public class BombermanGame extends Application {
                     }
                     if (brick.getItem() instanceof FlameItem) {
                         entity = new FlameItem(br.getPos(), Sprite.powerup_flames.getFxImage());
+                    }
+                    if (brick.getPortal() instanceof Portal) {
+                        entity = new Portal(br.getPos(), Sprite.portal.getFxImage());
                     }
                     destroyableObjects.add(entity);
                 } else {
@@ -386,6 +435,8 @@ public class BombermanGame extends Application {
             Entity o = destroyableObjects.get(i);
             if (o instanceof Item) {
                 if (((Item) o).collision(bomberman)) {
+                    eatItem.play();
+                    eatItem.seek(eatItem.getStartTime());
                     if (o instanceof SpeedItem) {
                         bomberman.setSpeed(bomberman.getSpeed() + 0.02);
                     } else if (o instanceof FlameItem) {
